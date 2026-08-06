@@ -9,46 +9,141 @@ import { toExcelRows } from "./medicineModel";
 
 const legacyPresetTypes = ["General", "Urgent", "Service", "Sales", "Follow Up"];
 
-export async function loadAppData() {
-  const [savedEntries, savedCustomStatuses, savedTypes, savedCategories, savedProfile, savedLoggedIn, savedTheme] = await Promise.all([
+const emptyUserData = () => ({
+  entries: [],
+  customStatuses: [],
+  types: defaultTypes,
+  categories: defaultCategories,
+  profile: defaultProfile
+});
+
+export const normalizeUsername = (username) =>
+  `${username || ""}`.trim().toLowerCase().replace(/\s+/g, "_");
+
+async function getUsers() {
+  const savedUsers = await AsyncStorage.getItem(STORAGE_KEYS.users);
+  return savedUsers ? JSON.parse(savedUsers) : {};
+}
+
+async function saveUsers(users) {
+  return AsyncStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
+}
+
+function normalizeUserData(userData = {}) {
+  return {
+    entries: Array.isArray(userData.entries) ? userData.entries : [],
+    customStatuses: Array.isArray(userData.customStatuses) ? userData.customStatuses : [],
+    types: Array.isArray(userData.types)
+      ? userData.types.filter((type) => !legacyPresetTypes.includes(type))
+      : defaultTypes,
+    categories: Array.isArray(userData.categories) ? userData.categories : defaultCategories,
+    profile: { ...defaultProfile, ...(userData.profile || {}) }
+  };
+}
+
+async function getLegacyData() {
+  const [savedEntries, savedCustomStatuses, savedTypes, savedCategories, savedProfile] = await Promise.all([
     AsyncStorage.getItem(STORAGE_KEYS.entries),
     AsyncStorage.getItem(STORAGE_KEYS.customStatuses),
     AsyncStorage.getItem(STORAGE_KEYS.types),
     AsyncStorage.getItem(STORAGE_KEYS.categories),
-    AsyncStorage.getItem(STORAGE_KEYS.profile),
-    AsyncStorage.getItem(STORAGE_KEYS.loggedIn),
-    AsyncStorage.getItem(STORAGE_KEYS.theme)
+    AsyncStorage.getItem(STORAGE_KEYS.profile)
   ]);
 
-  return {
+  return normalizeUserData({
     entries: savedEntries ? JSON.parse(savedEntries) : [],
     customStatuses: savedCustomStatuses ? JSON.parse(savedCustomStatuses) : [],
-	    types: savedTypes
-	      ? JSON.parse(savedTypes).filter((type) => !legacyPresetTypes.includes(type))
-	      : defaultTypes,
-	    categories: savedCategories ? JSON.parse(savedCategories) : defaultCategories,
-    profile: savedProfile ? { ...defaultProfile, ...JSON.parse(savedProfile) } : defaultProfile,
-    loggedIn: savedLoggedIn === "true",
+    types: savedTypes ? JSON.parse(savedTypes) : defaultTypes,
+    categories: savedCategories ? JSON.parse(savedCategories) : defaultCategories,
+    profile: savedProfile ? JSON.parse(savedProfile) : defaultProfile
+  });
+}
+
+export async function loadAppData() {
+  const [savedLoggedIn, savedTheme, savedActiveUsername] = await Promise.all([
+    AsyncStorage.getItem(STORAGE_KEYS.loggedIn),
+    AsyncStorage.getItem(STORAGE_KEYS.theme),
+    AsyncStorage.getItem(STORAGE_KEYS.activeUsername)
+  ]);
+
+  const activeUsername = normalizeUsername(savedActiveUsername);
+  const users = await getUsers();
+  const hasActiveUser = Boolean(activeUsername && users[activeUsername]);
+  const activeUserData = activeUsername && users[activeUsername]
+    ? normalizeUserData(users[activeUsername])
+    : emptyUserData();
+
+  return {
+    ...activeUserData,
+    activeUsername,
+    loggedIn: savedLoggedIn === "true" && hasActiveUser,
     themeMode: savedTheme || "light"
   };
 }
 
-export const saveEntries = (entries) =>
-  AsyncStorage.setItem(STORAGE_KEYS.entries, JSON.stringify(entries));
+async function saveUserField(username, field, value) {
+  const normalizedUsername = normalizeUsername(username);
+  if (!normalizedUsername) {
+    return;
+  }
 
-export const saveCustomStatuses = (customStatuses) =>
-  AsyncStorage.setItem(STORAGE_KEYS.customStatuses, JSON.stringify(customStatuses));
+  const users = await getUsers();
+  const currentUser = normalizeUserData(users[normalizedUsername]);
+  users[normalizedUsername] = {
+    ...currentUser,
+    [field]: value
+  };
+  await saveUsers(users);
+}
 
-export const saveTypes = (types) =>
-  AsyncStorage.setItem(STORAGE_KEYS.types, JSON.stringify(types));
+export async function loadUserData(username, seedProfile = {}) {
+  const normalizedUsername = normalizeUsername(username);
+  const users = await getUsers();
 
-export const saveCategories = (categories) =>
-  AsyncStorage.setItem(STORAGE_KEYS.categories, JSON.stringify(categories));
+  if (users[normalizedUsername]) {
+    return normalizeUserData(users[normalizedUsername]);
+  }
 
-export const saveProfile = (profile) =>
-  AsyncStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile));
+  const legacyData = await getLegacyData();
+  const hasLegacyData =
+    Object.keys(users).length === 0 &&
+    (legacyData.entries.length ||
+      legacyData.customStatuses.length ||
+      legacyData.profile.ownerName ||
+      legacyData.profile.businessName !== defaultProfile.businessName);
+  const userData = normalizeUserData({
+    ...(hasLegacyData ? legacyData : emptyUserData()),
+    profile: {
+      ...(hasLegacyData ? legacyData.profile : defaultProfile),
+      ...seedProfile,
+      username: normalizedUsername
+    }
+  });
+
+  users[normalizedUsername] = userData;
+  await saveUsers(users);
+  return userData;
+}
+
+export const saveEntries = (username, entries) =>
+  saveUserField(username, "entries", entries);
+
+export const saveCustomStatuses = (username, customStatuses) =>
+  saveUserField(username, "customStatuses", customStatuses);
+
+export const saveTypes = (username, types) =>
+  saveUserField(username, "types", types);
+
+export const saveCategories = (username, categories) =>
+  saveUserField(username, "categories", categories);
+
+export const saveProfile = (username, profile) =>
+  saveUserField(username, "profile", profile);
 
 export const saveLoggedIn = (loggedIn) => AsyncStorage.setItem(STORAGE_KEYS.loggedIn, loggedIn ? "true" : "false");
+
+export const saveActiveUsername = (username) =>
+  AsyncStorage.setItem(STORAGE_KEYS.activeUsername, normalizeUsername(username));
 
 export const saveThemeMode = (themeMode) => AsyncStorage.setItem(STORAGE_KEYS.theme, themeMode);
 

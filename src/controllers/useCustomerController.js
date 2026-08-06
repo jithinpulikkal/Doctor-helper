@@ -4,6 +4,9 @@ import { defaultProfile, emptyCategoryForm, emptyStatusForm, emptyTypeForm, them
 import { filterAndSortEntries, getNextSlno, makeForm, today } from "../models/medicineModel";
 import {
   loadAppData,
+  loadUserData,
+  normalizeUsername,
+  saveActiveUsername,
   saveCategories,
   saveCustomStatuses,
   saveEntries,
@@ -44,6 +47,7 @@ export function useCustomerController() {
   const [exportingPdf, setExportingPdf] = useState(false);
   const [themeMode, setThemeModeState] = useState("light");
   const [loggedIn, setLoggedIn] = useState(false);
+  const [activeUsername, setActiveUsername] = useState("");
   const [ready, setReady] = useState(false);
   const [dialog, setDialog] = useState(null);
 
@@ -58,6 +62,7 @@ export function useCustomerController() {
         setProfile(data.profile);
         setThemeModeState(data.themeMode);
         setLoggedIn(data.loggedIn);
+        setActiveUsername(data.activeUsername);
         setScreen(data.loggedIn ? "dashboard" : "start");
       } catch {
         showDialog("Storage error", "Saved data could not be loaded.", "error");
@@ -69,24 +74,34 @@ export function useCustomerController() {
   }, []);
 
   useEffect(() => {
-    saveEntries(entries);
-  }, [entries]);
+    if (ready && loggedIn && activeUsername) {
+      saveEntries(activeUsername, entries);
+    }
+  }, [activeUsername, entries, loggedIn, ready]);
 
   useEffect(() => {
-    saveCustomStatuses(customStatuses);
-  }, [customStatuses]);
+    if (ready && loggedIn && activeUsername) {
+      saveCustomStatuses(activeUsername, customStatuses);
+    }
+  }, [activeUsername, customStatuses, loggedIn, ready]);
 
   useEffect(() => {
-    saveTypes(types);
-  }, [types]);
+    if (ready && loggedIn && activeUsername) {
+      saveTypes(activeUsername, types);
+    }
+  }, [activeUsername, loggedIn, ready, types]);
 
   useEffect(() => {
-    saveCategories(categories);
-  }, [categories]);
+    if (ready && loggedIn && activeUsername) {
+      saveCategories(activeUsername, categories);
+    }
+  }, [activeUsername, categories, loggedIn, ready]);
 
   useEffect(() => {
-    saveProfile(profile);
-  }, [profile]);
+    if (ready && loggedIn && activeUsername) {
+      saveProfile(activeUsername, profile);
+    }
+  }, [activeUsername, loggedIn, profile, ready]);
 
   useEffect(() => {
     saveThemeMode(themeMode);
@@ -267,9 +282,22 @@ export function useCustomerController() {
   }
 
   async function login(profileData = {}) {
-    const nextProfile = { ...profile, ...profileData };
+    const username = normalizeUsername(profileData.username || profileData.ownerName || profile.ownerName);
+    if (!username) {
+      showDialog("Missing username", "Username is required.", "warning");
+      return;
+    }
+
+    const userData = await loadUserData(username, profileData);
+    const nextProfile = { ...userData.profile, ...profileData, username };
+    setEntries(userData.entries);
+    setCustomStatuses(userData.customStatuses);
+    setTypes(userData.types);
+    setCategories(userData.categories);
     setProfile(nextProfile);
-    await saveProfile(nextProfile);
+    setActiveUsername(username);
+    await saveProfile(username, nextProfile);
+    await saveActiveUsername(username);
     setLoggedIn(true);
     await saveLoggedIn(true);
     replaceScreen("dashboard");
@@ -731,6 +759,7 @@ export function useCustomerController() {
     listMode: normalizeListMode(listMode),
     newType,
     profile,
+    activeUsername,
     ready,
     loggedIn,
     screen,

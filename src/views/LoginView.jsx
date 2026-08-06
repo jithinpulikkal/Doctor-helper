@@ -5,8 +5,8 @@ import tw from "twrnc";
 
 export default function LoginView({ controller }) {
   const [loginForm, setLoginForm] = useState({
+    username: controller.activeUsername || controller.profile.username || "",
     ownerName: controller.profile.ownerName || "",
-    businessName: controller.profile.businessName || "",
     phone: controller.profile.phone || "",
     email: controller.profile.email || ""
   });
@@ -15,8 +15,8 @@ export default function LoginView({ controller }) {
 
   useEffect(() => {
     setLoginForm((current) => ({
+      username: current.username || controller.activeUsername || controller.profile.username || "",
       ownerName: current.ownerName || controller.profile.ownerName || "",
-      businessName: current.businessName || controller.profile.businessName || "",
       phone: current.phone || controller.profile.phone || "",
       email: current.email || controller.profile.email || ""
     }));
@@ -27,8 +27,8 @@ export default function LoginView({ controller }) {
   }
 
   function submitLogin() {
-    if (!loginForm.ownerName.trim() || !loginForm.businessName.trim()) {
-      controller.showDialog("Missing details", "Doctor name and clinic name are required.", "warning");
+    if (!loginForm.username.trim() || !loginForm.ownerName.trim()) {
+      controller.showDialog("Missing details", "Username and name are required.", "warning");
       return;
     }
     controller.login(loginForm);
@@ -41,26 +41,27 @@ export default function LoginView({ controller }) {
           <View style={tw`w-16 h-16 items-center justify-center rounded-3xl ${controller.theme.accentBg}`}>
             <ShieldCheck size={30} color={controller.theme.accentColor} />
           </View>
-          <Text style={tw`mt-4 text-3xl font-black ${controller.theme.text}`}>Login</Text>
+          <Text style={tw`mt-5 text-3xl font-black ${controller.theme.text}`}>Login</Text>
           <Text style={tw`mt-2 leading-6 ${controller.theme.muted}`}>
-            Data is saved locally and shown on your profile page.
+            Data is saved separately for each username.
           </Text>
 
           <View style={tw`gap-3 mt-3`}>
+            <LoginField label="Username" controller={controller}>
+              <TextInput
+                value={loginForm.username}
+                onChangeText={(value) => setField("username", value)}
+                placeholder="Choose or enter username"
+                placeholderTextColor={placeholderColor}
+                style={inputStyle}
+                autoCapitalize="none"
+              />
+            </LoginField>
             <LoginField label="Name" controller={controller}>
               <TextInput
                 value={loginForm.ownerName}
                 onChangeText={(value) => setField("ownerName", value)}
                 placeholder="Your name"
-                placeholderTextColor={placeholderColor}
-                style={inputStyle}
-              />
-            </LoginField>
-            <LoginField label="Clinic / Library Name" controller={controller}>
-              <TextInput
-                value={loginForm.businessName}
-                onChangeText={(value) => setField("businessName", value)}
-                placeholder="Clinic or medicine library name"
                 placeholderTextColor={placeholderColor}
                 style={inputStyle}
               />

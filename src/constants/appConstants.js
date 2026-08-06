@@ -1,4 +1,6 @@
 export const STORAGE_KEYS = {
+  users: "doctor_helper_users_v2",
+  activeUsername: "doctor_helper_active_username_v2",
   entries: "customer_requirement_entries_v1",
   customStatuses: "customer_requirement_custom_statuses_v1",
   types: "customer_requirement_types_v1",
