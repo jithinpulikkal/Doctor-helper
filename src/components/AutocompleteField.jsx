@@ -1,6 +1,6 @@
 import { Check, ChevronDown } from "lucide-react-native";
 import { useMemo, useRef, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
 
 export default function AutocompleteField({
@@ -29,7 +29,7 @@ export default function AutocompleteField({
       ? uniqueOptions.filter((option) => option.toLowerCase().includes(normalizedValue))
       : uniqueOptions;
 
-    return matches.slice(0, 6);
+    return matches.slice(0, 30);
   }, [focused, normalizedValue, uniqueOptions]);
   const exactMatch = normalizedValue
     ? uniqueOptions.some((option) => option.toLowerCase() === normalizedValue)
@@ -90,27 +90,31 @@ export default function AutocompleteField({
       </Pressable>
 
       {showOptions || showNotFound ? (
-        <View style={tw`mt-1 max-h-48 overflow-hidden rounded-b-2xl border border-t-0 ${dark ? "bg-[#232323] border-[#3a3a3a]" : "bg-white border-[#dde2ea]"}`}>
+        <View style={tw`mt-1 max-h-64 overflow-hidden rounded-b-2xl border border-t-0 ${dark ? "bg-[#232323] border-[#3a3a3a]" : "bg-white border-[#dde2ea]"}`}>
           {showNotFound ? (
             <View style={tw`px-4 py-3`}>
               <Text style={tw`text-sm font-bold ${dark ? "text-[#777d90]" : "text-[#8d96a3]"}`}>Not found</Text>
             </View>
-          ) : visibleOptions.map((option) => {
-            const selected = option.toLowerCase() === normalizedValue;
-            return (
-              <Pressable
-                key={option}
-                onPressIn={() => selectOption(option)}
-                style={tw`px-4 py-3 border-b ${dark ? "border-[#3a3a3a]" : "border-[#edf0f4]"} ${
-                  selected ? (dark ? "bg-[#303030]" : "bg-[#e7e7e9]") : ""
-                }`}
-              >
-                <Text style={tw`text-sm ${selected ? "font-bold" : ""} ${dark ? "text-[#f4f1ea]" : "text-[#20252d]"}`}>
-                  {option}
-                </Text>
-              </Pressable>
-            );
-          })}
+          ) : (
+            <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always">
+              {visibleOptions.map((option) => {
+                const selected = option.toLowerCase() === normalizedValue;
+                return (
+                  <Pressable
+                    key={option}
+                    onPress={() => selectOption(option)}
+                    style={tw`px-4 py-3 border-b ${dark ? "border-[#3a3a3a]" : "border-[#edf0f4]"} ${
+                      selected ? (dark ? "bg-[#303030]" : "bg-[#e7e7e9]") : ""
+                    }`}
+                  >
+                    <Text style={tw`text-sm ${selected ? "font-bold" : ""} ${dark ? "text-[#f4f1ea]" : "text-[#20252d]"}`}>
+                      {option}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          )}
         </View>
       ) : null}
     </View>

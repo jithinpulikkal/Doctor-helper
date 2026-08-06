@@ -67,7 +67,7 @@ export default function ListView({ controller }) {
     return (
         <View style={tw`flex-1 ${controller.theme.page}`}>
             <Header controller={controller} title="Medicines" />
-            <ScrollView keyboardShouldPersistTaps="always" contentContainerStyle={tw`px-5 pb-24`}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={tw`px-5 pb-24`}>
                 <View
                     style={tw`flex-row gap-2 mb-4 p-1 ${controller.theme.card} rounded-full border ${controller.theme.border}`}
                 >
