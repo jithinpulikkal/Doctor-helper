@@ -1,17 +1,14 @@
 import { CloudUpload, Download, FileSpreadsheet, FileText, Share } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
-import DatePickerField from "../components/DatePickerField";
-import DropdownField from "../components/DropdownField";
+import AutocompleteField from "../components/AutocompleteField";
 import Field from "../components/Field";
 import Header from "../components/Header";
 
 export default function ExportView({ controller }) {
   const exportFilterCount = [
-    controller.exportFilter.fromDate,
-    controller.exportFilter.toDate,
     controller.exportFilter.medicine,
-    controller.exportFilter.status,
+    controller.exportFilter.category,
     controller.exportFilter.type
   ].filter(Boolean).length;
 
@@ -43,54 +40,40 @@ export default function ExportView({ controller }) {
           </View>
 
           <View style={tw`gap-3 mt-5`}>
-            <Field label="From Date" labelClass={controller.theme.muted}>
-              <DatePickerField
-                value={controller.exportFilter.fromDate}
-                onChange={(fromDate) => controller.setExportFilter({ ...controller.exportFilter, fromDate })}
-                variant={controller.themeMode}
-              />
-            </Field>
-            <Field label="To Date" labelClass={controller.theme.muted}>
-              <DatePickerField
-                value={controller.exportFilter.toDate}
-                onChange={(toDate) => controller.setExportFilter({ ...controller.exportFilter, toDate })}
-                variant={controller.themeMode}
-              />
-            </Field>
             <Field label="Medicine" labelClass={controller.theme.muted}>
-              <DropdownField
-                placeholder="All medicines"
+              <AutocompleteField
+                placeholder="Type medicine"
                 value={controller.exportFilter.medicine}
                 options={Array.from(new Set(controller.entries.map((entry) => entry.name).filter(Boolean)))}
                 onChange={(medicine) => controller.setExportFilter({ ...controller.exportFilter, medicine })}
-                allowEmpty
+                onSelect={(medicine) => controller.setExportFilter({ ...controller.exportFilter, medicine })}
                 variant={controller.themeMode}
               />
             </Field>
-            <Field label="Availability" labelClass={controller.theme.muted}>
-              <DropdownField
-                placeholder="All availability statuses"
-                value={controller.exportFilter.status}
-                options={controller.statusOptions}
-                onChange={(status) => controller.setExportFilter({ ...controller.exportFilter, status })}
-                allowEmpty
+            <Field label="Category" labelClass={controller.theme.muted}>
+              <AutocompleteField
+                placeholder="Type category"
+                value={controller.exportFilter.category}
+                options={controller.categories}
+                onChange={(category) => controller.setExportFilter({ ...controller.exportFilter, category })}
+                onSelect={(category) => controller.setExportFilter({ ...controller.exportFilter, category })}
                 variant={controller.themeMode}
               />
             </Field>
             <Field label="Type" labelClass={controller.theme.muted}>
-              <DropdownField
-                placeholder="All types"
+              <AutocompleteField
+                placeholder="Type medicine type"
                 value={controller.exportFilter.type}
                 options={controller.types}
                 onChange={(type) => controller.setExportFilter({ ...controller.exportFilter, type })}
-                allowEmpty
+                onSelect={(type) => controller.setExportFilter({ ...controller.exportFilter, type })}
                 variant={controller.themeMode}
               />
             </Field>
           </View>
 
           <Pressable
-            onPress={() => controller.setExportFilter({ fromDate: "", toDate: "", medicine: "", status: "", type: "" })}
+            onPress={() => controller.setExportFilter({ fromDate: "", toDate: "", medicine: "", category: "", status: "", type: "" })}
             style={tw`h-12 mt-4 items-center justify-center rounded-2xl ${controller.theme.cardAlt}`}
           >
             <Text style={tw`text-sm font-black ${controller.theme.muted}`}>Clear Conditions</Text>
@@ -99,10 +82,11 @@ export default function ExportView({ controller }) {
 
          <View style={tw`p-5 mt-4 ${controller.theme.cardAlt} rounded-3xl`}>
           <Text style={tw`text-lg font-black ${controller.theme.text}`}>Export summary</Text>
-          <View style={tw`flex-row gap-3 mt-4`}>
-            <SummaryPill controller={controller} label="Matched" value={controller.exportEntriesList.length} />
-            <SummaryPill controller={controller} label="Medicines" value={new Set(controller.exportEntriesList.map((entry) => entry.name).filter(Boolean)).size} />
-            <SummaryPill controller={controller} label="Types" value={new Set(controller.exportEntriesList.map((entry) => entry.type).filter(Boolean)).size} />
+	          <View style={tw`flex-row flex-wrap gap-3 mt-4`}>
+	            <SummaryPill controller={controller} label="Matched" value={controller.exportEntriesList.length} />
+	            <SummaryPill controller={controller} label="Medicines" value={new Set(controller.exportEntriesList.map((entry) => entry.name).filter(Boolean)).size} />
+	            <SummaryPill controller={controller} label="Categories" value={new Set(controller.exportEntriesList.map((entry) => entry.location).filter(Boolean)).size} />
+	            <SummaryPill controller={controller} label="Types" value={new Set(controller.exportEntriesList.map((entry) => entry.type).filter(Boolean)).size} />
           </View>
         </View>
 
@@ -162,8 +146,8 @@ function ExportCard({ accent = false, controller, description, icon: Icon, loadi
 
 function SummaryPill({ controller, label, value }) {
   return (
-    <View style={tw`flex-1 p-3 rounded-2xl ${controller.theme.card}`}>
-      <Text style={tw`text-xs font-black ${controller.theme.muted}`}>{label}</Text>
+    <View style={tw`w-[48%] p-3 rounded-2xl ${controller.theme.card}`}>
+      <Text numberOfLines={1} adjustsFontSizeToFit style={tw`text-xs font-black ${controller.theme.muted}`}>{label}</Text>
       <Text style={tw`mt-1 text-2xl font-black ${controller.theme.text}`}>{value}</Text>
     </View>
   );

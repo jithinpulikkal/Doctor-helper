@@ -27,7 +27,7 @@ export async function loadAppData() {
 	      ? JSON.parse(savedTypes).filter((type) => !legacyPresetTypes.includes(type))
 	      : defaultTypes,
 	    categories: savedCategories ? JSON.parse(savedCategories) : defaultCategories,
-    profile: savedProfile ? JSON.parse(savedProfile) : defaultProfile,
+    profile: savedProfile ? { ...defaultProfile, ...JSON.parse(savedProfile) } : defaultProfile,
     loggedIn: savedLoggedIn === "true",
     themeMode: savedTheme || "light"
   };
@@ -242,7 +242,6 @@ function buildPdfHtml(entries, profile, stats, filter = {}) {
       (entry) => `
         <tr>
           <td class="center">${escapeHtml(entry.slno)}</td>
-          <td>${escapeHtml(entry.date || "-")}</td>
           <td class="strong">${escapeHtml(entry.name || "-")}</td>
           <td>${escapeHtml(entry.phone || "-")}</td>
           <td>${escapeHtml(entry.details || "-")}</td>
@@ -252,24 +251,12 @@ function buildPdfHtml(entries, profile, stats, filter = {}) {
           <td>${escapeHtml(entry.dosage || entry.detail3 || "-")}</td>
           <td>${escapeHtml(entry.warnings || "-")}</td>
           <td>${escapeHtml(entry.type || "-")}</td>
-          <td>${escapeHtml(entry.status || "-")}</td>
           <td>${escapeHtml(entry.notes || "-")}</td>
         </tr>
       `
     )
     .join("");
 
-  const statusRows = Object.entries(stats.byStatus || {})
-    .map(
-      ([status, count]) => `
-        <tr>
-          <td>${escapeHtml(status)}</td>
-          <td class="right">${count}</td>
-          <td class="right">${stats.total ? Math.round((count / stats.total) * 100) : 0}%</td>
-        </tr>
-      `
-    )
-    .join("");
   const typeCounts = entries.reduce((result, entry) => {
     const type = entry.type || "No type";
     result[type] = (result[type] || 0) + 1;
@@ -437,8 +424,9 @@ function buildPdfHtml(entries, profile, stats, filter = {}) {
           <div class="section">
             <h2>Doctor Details</h2>
             <table class="details">
-              <tr><td>Clinic / Library</td><td>${escapeHtml(profile?.businessName || "-")}</td></tr>
               <tr><td>Owner Name</td><td>${escapeHtml(profile?.ownerName || "-")}</td></tr>
+              <tr><td>Designation</td><td>${escapeHtml(profile?.designation || "-")}</td></tr>
+              <tr><td>Clinic / Library</td><td>${escapeHtml(profile?.businessName || "-")}</td></tr>
               <tr><td>Phone</td><td>${escapeHtml(profile?.phone || "-")}</td></tr>
               <tr><td>Email</td><td>${escapeHtml(profile?.email || "-")}</td></tr>
               <tr><td>Place</td><td>${escapeHtml(profile?.place || "-")}</td></tr>
@@ -447,23 +435,14 @@ function buildPdfHtml(entries, profile, stats, filter = {}) {
           <div class="section">
             <h2>Export Conditions</h2>
             <table class="details">
-              <tr><td>From Date</td><td>${escapeHtml(filterValue(filter.fromDate))}</td></tr>
-              <tr><td>To Date</td><td>${escapeHtml(filterValue(filter.toDate))}</td></tr>
               <tr><td>Medicine</td><td>${escapeHtml(filterValue(filter.medicine))}</td></tr>
-              <tr><td>Availability</td><td>${escapeHtml(filterValue(filter.status))}</td></tr>
+              <tr><td>Category</td><td>${escapeHtml(filterValue(filter.category))}</td></tr>
               <tr><td>Type</td><td>${escapeHtml(filterValue(filter.type))}</td></tr>
             </table>
           </div>
         </div>
 
         <div class="breakdown-grid">
-          <div class="section">
-            <h2>Availability Breakdown</h2>
-            <table class="details">
-              <tr><td><strong>Availability</strong></td><td class="right"><strong>Count</strong></td><td class="right"><strong>Percent</strong></td></tr>
-              ${statusRows || emptyBreakdownRow}
-            </table>
-          </div>
           <div class="section">
             <h2>Type Breakdown</h2>
             <table class="details">
@@ -477,23 +456,21 @@ function buildPdfHtml(entries, profile, stats, filter = {}) {
           <h2>Medicine Records</h2>
           <table class="entries">
           <thead>
-            <tr>
-              <th style="width: 4%;">SL</th>
-              <th style="width: 9%;">Date</th>
-              <th style="width: 10%;">Medicine</th>
-              <th style="width: 8%;">Brand</th>
-              <th style="width: 9%;">Details</th>
-              <th style="width: 8%;">Category</th>
-              <th style="width: 9%;">Alternates</th>
-              <th style="width: 9%;">Used For</th>
-              <th style="width: 8%;">Dosage</th>
-              <th style="width: 8%;">Warnings</th>
-              <th style="width: 8%;">Type</th>
-              <th style="width: 8%;">Availability</th>
-              <th style="width: 9%;">Notes</th>
-            </tr>
-          </thead>
-	          <tbody>${rows || `<tr><td colspan="13">No entries found.</td></tr>`}</tbody>
+	            <tr>
+	              <th style="width: 4%;">SL</th>
+	              <th style="width: 13%;">Medicine</th>
+	              <th style="width: 10%;">Brand</th>
+	              <th style="width: 11%;">Details</th>
+	              <th style="width: 10%;">Category</th>
+	              <th style="width: 11%;">Alternates</th>
+	              <th style="width: 11%;">Used For</th>
+	              <th style="width: 9%;">Dosage</th>
+	              <th style="width: 9%;">Warnings</th>
+	              <th style="width: 8%;">Type</th>
+	              <th style="width: 8%;">Notes</th>
+	            </tr>
+	          </thead>
+		          <tbody>${rows || `<tr><td colspan="11">No entries found.</td></tr>`}</tbody>
           </table>
         </div>
 

@@ -13,14 +13,15 @@ import {
     Trash2,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
-import DropdownField from "../components/DropdownField";
+import AutocompleteField from "../components/AutocompleteField";
 import Field from "../components/Field";
 import Header from "../components/Header";
 
 export default function ListView({ controller }) {
     const [filtersOpen, setFiltersOpen] = useState(false);
+    const [searchText, setSearchText] = useState("");
     const listTabs = [
         { key: "entries", label: "Medicines" },
         { key: "categories", label: "Category" },
@@ -28,7 +29,40 @@ export default function ListView({ controller }) {
         // { key: "statuses", label: "Stock" },
         { key: "types", label: "Types" },
     ];
-    const activeFilters = [controller.filter.medicine, controller.filter.type].filter(Boolean).length;
+    const activeFilters = [searchText.trim(), controller.filter.type].filter(Boolean).length;
+    const normalizedSearch = searchText.trim().toLowerCase();
+    const searchedEntries = normalizedSearch
+        ? controller.visibleEntries.filter((entry) =>
+              [
+                  entry.name,
+                  entry.phone,
+                  entry.details,
+                  entry.location,
+                  entry.type,
+                  entry.alternates || entry.detail1,
+                  entry.usedFor || entry.detail2,
+                  entry.dosage || entry.detail3,
+                  entry.warnings,
+                  entry.notes,
+              ]
+                  .filter(Boolean)
+                  .some((value) => `${value}`.toLowerCase().includes(normalizedSearch)),
+          )
+        : controller.visibleEntries;
+    const displayedEntries = [...searchedEntries].sort((leftEntry, rightEntry) => {
+        const left =
+            controller.sortBy === "slno"
+                ? Number(leftEntry.slno) || leftEntry.slno || ""
+                : `${leftEntry[controller.sortBy] || ""}`.toLowerCase();
+        const right =
+            controller.sortBy === "slno"
+                ? Number(rightEntry.slno) || rightEntry.slno || ""
+                : `${rightEntry[controller.sortBy] || ""}`.toLowerCase();
+
+        if (left < right) return controller.sortDir === "asc" ? -1 : 1;
+        if (left > right) return controller.sortDir === "asc" ? 1 : -1;
+        return 0;
+    });
 
     return (
         <View style={tw`flex-1 ${controller.theme.page}`}>
@@ -67,7 +101,7 @@ export default function ListView({ controller }) {
                                 </View>
                                 <View style={tw`ml-4 flex-1`}>
                                     <Text style={tw`text-3xl font-black ${controller.theme.text}`}>
-                                        {controller.visibleEntries.length}
+                                        {displayedEntries.length}
                                     </Text>
                                     <Text style={tw`text-sm font-bold ${controller.theme.muted}`}>Medicine List</Text>
                                 </View>
@@ -83,7 +117,7 @@ export default function ListView({ controller }) {
                                     size={18}
                                     color={controller.themeMode === "dark" ? "#f4f1ea" : "#20252d"}
                                 />
-                                <Text style={tw`ml-2 flex-1 font-black ${controller.theme.text}`}>Filter and sort</Text>
+                                <Text style={tw`ml-2 flex-1 font-black ${controller.theme.text}`}>Search and sort</Text>
                                 {activeFilters ? (
                                     <>
                                         <View style={tw`mr-2 px-3 py-1 rounded-full ${controller.theme.accentBg}`}>
@@ -91,12 +125,13 @@ export default function ListView({ controller }) {
                                                 {activeFilters}
                                             </Text>
                                         </View>
-                                        <Pressable
-                                            onPress={() =>
-                                                controller.setFilter({ date: "", medicine: "", type: "", status: "" })
-                                            }
-                                            style={tw`mr-3 px-3 py-1.5 rounded-full ${controller.theme.cardAlt}`}
-                                        >
+	                                        <Pressable
+	                                            onPress={() => {
+	                                                setSearchText("");
+	                                                controller.setFilter({ date: "", medicine: "", type: "", status: "" });
+	                                            }}
+	                                            style={tw`mr-3 px-3 py-1.5 rounded-full ${controller.theme.cardAlt}`}
+	                                        >
                                             <Text style={tw`text-[10px] font-black ${controller.theme.muted}`}>Clear</Text>
                                         </Pressable>
                                     </>
@@ -111,32 +146,30 @@ export default function ListView({ controller }) {
                                 )}
                             </Pressable>
 
-                            {filtersOpen ? (
-                                <>
-                                    <View style={tw`gap-3 mt-4`}>
-                                        <Field label="Medicine" labelClass={controller.theme.muted}>
-                                            <DropdownField
-                                                placeholder="All medicines"
-                                                value={controller.filter.medicine}
-                                                options={Array.from(
-                                                    new Set(controller.entries.map((entry) => entry.name).filter(Boolean)),
-                                                )}
-                                                onChange={(medicine) =>
-                                                    controller.setFilter({ ...controller.filter, medicine })
-                                                }
-                                                allowEmpty
-                                                variant={controller.themeMode}
-                                            />
-                                        </Field>
-                                        <Field label="Type" labelClass={controller.theme.muted}>
-                                            <DropdownField
-                                                placeholder="All types"
-                                                value={controller.filter.type}
-                                                options={controller.types}
-                                                onChange={(type) => controller.setFilter({ ...controller.filter, type })}
-                                                allowEmpty
-                                                variant={controller.themeMode}
-                                            />
+	                            {filtersOpen ? (
+	                                <>
+	                                    <View style={tw`gap-3 mt-4`}>
+                                            <Field label="Medicine" labelClass={controller.theme.muted}>
+                                                <View style={tw`px-4 min-h-13 flex-row items-center border rounded-2xl ${controller.theme.input}`}>
+                                                    <Search size={18} color={controller.theme.iconMuted} />
+                                                    <TextInput
+                                                        value={searchText}
+                                                        onChangeText={setSearchText}
+                                                        placeholder="Search medicines"
+                                                        placeholderTextColor={controller.themeMode === "dark" ? "#777d90" : "#8d96a3"}
+                                                        style={tw`ml-3 flex-1 min-h-13 text-base ${controller.themeMode === "dark" ? "text-[#f4f1ea]" : "text-[#20252d]"}`}
+                                                    />
+                                                </View>
+                                            </Field>
+	                                        <Field label="Type" labelClass={controller.theme.muted}>
+	                                            <AutocompleteField
+	                                                placeholder="Type medicine type"
+	                                                value={controller.filter.type}
+	                                                options={controller.types}
+	                                                onChange={(type) => controller.setFilter({ ...controller.filter, type })}
+	                                                onSelect={(type) => controller.setFilter({ ...controller.filter, type })}
+	                                                variant={controller.themeMode}
+	                                            />
                                         </Field>
                                     </View>
 
@@ -168,7 +201,7 @@ export default function ListView({ controller }) {
                                             }
                                             style={tw`flex-1 items-center justify-center py-3 rounded-full ${controller.theme.accentBg}`}
                                         >
-                                            <Text style={tw`text-xs font-black ${controller.theme.accentText}`}>
+                                            <Text style={tw`text-center text-xs font-black ${controller.theme.accentText}`}>
                                                 {controller.sortDir === "asc" ? "ASC" : "DESC"}
                                             </Text>
                                         </Pressable>
@@ -177,21 +210,21 @@ export default function ListView({ controller }) {
                             ) : null}
                         </View>
 
-                        <View style={tw`flex-row items-center justify-between mb-3`}>
-                            <View style={tw`flex-row items-center`}>
-                                <Search size={18} color={controller.themeMode === "dark" ? "#f4f1ea" : "#20252d"} />
-                                <Text style={tw`ml-2 text-lg font-black ${controller.theme.text}`}>Medicines</Text>
-                            </View>
-                        </View>
+	                        <View style={tw`flex-row items-center justify-between mb-3`}>
+	                            <View style={tw`flex-row items-center`}>
+	                                <Search size={18} color={controller.themeMode === "dark" ? "#f4f1ea" : "#20252d"} />
+	                                <Text style={tw`ml-2 text-lg font-black ${controller.theme.text}`}>Medicines</Text>
+	                            </View>
+	                        </View>
 
-                        {controller.visibleEntries.length === 0 ? (
-                            <View
-                                style={tw`items-center p-8 ${controller.theme.card} rounded-3xl border border-dashed ${controller.theme.border}`}
-                            >
-                                <Text style={tw`text-center ${controller.theme.muted}`}>No medicines found.</Text>
-                            </View>
-                        ) : (
-                            controller.visibleEntries.map((entry) => (
+	                        {displayedEntries.length === 0 ? (
+	                            <View
+	                                style={tw`items-center p-8 ${controller.theme.card} rounded-3xl border border-dashed ${controller.theme.border}`}
+	                            >
+	                                <Text style={tw`text-center ${controller.theme.muted}`}>{searchText ? "No medicines match your search." : "No medicines found."}</Text>
+	                            </View>
+	                        ) : (
+	                            displayedEntries.map((entry) => (
                                 <EntryCard
                                     controller={controller}
                                     key={entry.id}

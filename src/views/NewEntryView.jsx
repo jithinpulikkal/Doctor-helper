@@ -15,13 +15,14 @@ export default function NewEntryView({ controller }) {
           onPress={controller.openEntryCreate}
           title="Medicine Entry"
         />
-        <OptionCard
+        {/* Availability hidden for now. Keep status option creation code available for future use. */}
+        {/* <OptionCard
           controller={controller}
           description="Add an availability option such as available, low stock, or unavailable."
           icon={ListPlus}
           onPress={controller.openStatusCreate}
           title="Availability"
-        />
+        /> */}
         <OptionCard
           controller={controller}
           description="Add a medicine category such as antibiotic, analgesic, or antihistamine."

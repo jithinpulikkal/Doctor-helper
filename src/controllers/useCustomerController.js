@@ -37,8 +37,8 @@ export function useCustomerController() {
   const [listMode, setListMode] = useState("entries");
   const [newType, setNewType] = useState("");
   const [filter, setFilter] = useState({ date: "", medicine: "", type: "", status: "" });
-  const [exportFilter, setExportFilter] = useState({ fromDate: "", toDate: "", medicine: "", status: "", type: "" });
-  const [sortBy, setSortBy] = useState("date");
+  const [exportFilter, setExportFilter] = useState({ fromDate: "", toDate: "", medicine: "", category: "", status: "", type: "" });
+  const [sortBy, setSortBy] = useState("slno");
   const [sortDir, setSortDir] = useState("desc");
   const [exporting, setExporting] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -130,10 +130,17 @@ export function useCustomerController() {
         .filter((entry) => {
           const matchesFrom = exportFilter.fromDate ? entry.date >= exportFilter.fromDate : true;
           const matchesTo = exportFilter.toDate ? entry.date <= exportFilter.toDate : true;
-          const matchesMedicine = exportFilter.medicine ? entry.name === exportFilter.medicine : true;
+          const matchesMedicine = exportFilter.medicine
+            ? `${entry.name || ""}`.toLowerCase().includes(exportFilter.medicine.toLowerCase())
+            : true;
+          const matchesCategory = exportFilter.category
+            ? `${entry.location || ""}`.toLowerCase().includes(exportFilter.category.toLowerCase())
+            : true;
           const matchesStatus = exportFilter.status ? entry.status === exportFilter.status : true;
-          const matchesType = exportFilter.type ? entry.type === exportFilter.type : true;
-          return matchesFrom && matchesTo && matchesMedicine && matchesStatus && matchesType;
+          const matchesType = exportFilter.type
+            ? `${entry.type || ""}`.toLowerCase().includes(exportFilter.type.toLowerCase())
+            : true;
+          return matchesFrom && matchesTo && matchesMedicine && matchesCategory && matchesStatus && matchesType;
         })
         .sort((left, right) => {
           const leftSlno = Number(left.slno);

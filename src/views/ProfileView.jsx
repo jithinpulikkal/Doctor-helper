@@ -89,8 +89,11 @@ export default function ProfileView({ controller }) {
                             Dr. {controller.profile.ownerName || "Owner Name"}
                         </Text>
                         <Text style={tw`mt-1 text-base font-bold ${controller.theme.muted}`}>
-                            {controller.profile.businessName || "Doctor Helper"}
+                            {controller.profile.designation || "Designation"}
                         </Text>
+                        {/* <Text style={tw`mt-1 text-base font-bold ${controller.theme.muted}`}>
+                            {controller.profile.businessName || "Doctor Helper"}
+                        </Text> */}
 
                         <View style={tw`w-full h-px my-5 ${controller.theme.cardAlt}`} />
 
@@ -114,18 +117,27 @@ export default function ProfileView({ controller }) {
                 <View style={tw`p-5 mt-4 ${controller.theme.card} rounded-3xl shadow-sm`}>
                     <Text style={tw`mb-4 text-lg font-black ${controller.theme.text}`}>Doctor details</Text>
                     <View style={tw`gap-4`}>
-                        <Field label="Clinic / Library Name" labelClass={controller.theme.muted}>
-                            <TextInput
-                                value={controller.profile.businessName}
-                                onChangeText={(value) => setProfileField("businessName", value)}
-                                placeholderTextColor={placeholderColor}
-                                style={themedInputStyle}
-                            />
-                        </Field>
+                        
                         <Field label="Owner Name" labelClass={controller.theme.muted}>
                             <TextInput
                                 value={controller.profile.ownerName}
                                 onChangeText={(value) => setProfileField("ownerName", value)}
+                                placeholderTextColor={placeholderColor}
+                                style={themedInputStyle}
+                            />
+                        </Field>
+                        <Field label="Designation" labelClass={controller.theme.muted}>
+                            <TextInput
+                                value={controller.profile.designation}
+                                onChangeText={(value) => setProfileField("designation", value)}
+                                placeholderTextColor={placeholderColor}
+                                style={themedInputStyle}
+                            />
+                        </Field>
+                        <Field label="Clinic / Library Name" labelClass={controller.theme.muted}>
+                            <TextInput
+                                value={controller.profile.businessName}
+                                onChangeText={(value) => setProfileField("businessName", value)}
                                 placeholderTextColor={placeholderColor}
                                 style={themedInputStyle}
                             />

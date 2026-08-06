@@ -34,7 +34,11 @@ export default function DropdownField({ allowEmpty = false, onChange, options, p
       {open ? (
         <View style={tw`mb-2 max-h-64 overflow-hidden rounded-2xl border shadow-sm ${palette.menu}`}>
           <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled">
-            {dropdownOptions.map((option) => {
+            {dropdownOptions.length === 0 ? (
+              <View style={tw`px-4 py-4`}>
+                <Text style={tw`text-base font-bold ${palette.muted}`}>Not found</Text>
+              </View>
+            ) : dropdownOptions.map((option) => {
               const label = option || placeholder;
               const selected = option === value;
               return (

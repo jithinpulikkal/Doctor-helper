@@ -65,6 +65,7 @@ export const defaultCategories = ["Antibiotic", "Analgesic", "Antihistamine", "A
 export const defaultProfile = {
   businessName: "Doctor Helper",
   ownerName: "",
+  designation: "",
   phone: "",
   email: "",
   place: "",

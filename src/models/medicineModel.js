@@ -34,7 +34,7 @@ export const filterAndSortEntries = (entries, filter, sortBy, sortDir) => {
   const filtered = entries.filter((entry) => {
     const matchesDate = filter.date ? entry.date.includes(filter.date) : true;
     const matchesMedicine = filter.medicine ? entry.name === filter.medicine : true;
-    const matchesType = filter.type ? entry.type === filter.type : true;
+    const matchesType = filter.type ? `${entry.type || ""}`.toLowerCase().includes(filter.type.toLowerCase()) : true;
     const matchesStatus = filter.status ? entry.status === filter.status : true;
     return matchesDate && matchesMedicine && matchesType && matchesStatus;
   });
