@@ -1,4 +1,4 @@
-import { ArrowLeft, LogIn, ShieldCheck } from "lucide-react-native";
+import { LogIn, ShieldCheck } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
@@ -36,24 +36,17 @@ export default function LoginView({ controller }) {
 
   return (
     <View style={tw`flex-1 ${controller.theme.page}`}>
-      <ScrollView contentContainerStyle={tw`px-5 pt-10 flex-grow justify-center`}>
-        <Pressable
-          onPress={() => controller.setScreen("start")}
-          style={tw`w-12 h-12 mb-5 items-center justify-center rounded-full ${controller.theme.card}`}
-        >
-          <ArrowLeft size={20} color={controller.themeMode === "dark" ? "#f8fafc" : "#20252d"} />
-        </Pressable>
-
+      <ScrollView contentContainerStyle={tw`px-5 py-8 flex-grow justify-center`}>
         <View style={tw`p-5 rounded-3xl ${controller.theme.card} shadow-sm`}>
           <View style={tw`w-16 h-16 items-center justify-center rounded-3xl ${controller.theme.accentBg}`}>
             <ShieldCheck size={30} color={controller.theme.accentColor} />
           </View>
-          <Text style={tw`mt-5 text-3xl font-black ${controller.theme.text}`}>Login</Text>
+          <Text style={tw`mt-4 text-3xl font-black ${controller.theme.text}`}>Login</Text>
           <Text style={tw`mt-2 leading-6 ${controller.theme.muted}`}>
-            Enter your doctor or clinic details. These are saved locally and shown on your profile page.
+            Data is saved locally and shown on your profile page.
           </Text>
 
-          <View style={tw`gap-3 mt-5`}>
+          <View style={tw`gap-3 mt-3`}>
             <LoginField label="Name" controller={controller}>
               <TextInput
                 value={loginForm.ownerName}
@@ -94,15 +87,15 @@ export default function LoginView({ controller }) {
               />
             </LoginField>
           </View>
-
-          <Pressable
-            onPress={submitLogin}
-            style={tw`h-15 mt-5 flex-row items-center justify-center rounded-full ${controller.theme.primary}`}
-          >
-            <LogIn size={20} color={controller.themeMode === "dark" ? "#171717" : "#ffffff"} />
-            <Text style={tw`ml-2 text-base font-black ${controller.theme.primaryText}`}>Login</Text>
-          </Pressable>
         </View>
+
+        <Pressable
+          onPress={submitLogin}
+          style={tw`h-15 mt-5 flex-row items-center justify-center rounded-full ${controller.theme.primary}`}
+        >
+          <Text style={tw`mr-2 text-base font-black ${controller.theme.primaryText}`}>Login</Text>
+          <LogIn size={20} color={controller.themeMode === "dark" ? "#171717" : "#ffffff"} />
+        </Pressable>
       </ScrollView>
     </View>
   );

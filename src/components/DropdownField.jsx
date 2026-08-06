@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
 
 export default function DropdownField({ allowEmpty = false, onChange, options, placeholder = "Select", value, variant = "light" }) {
@@ -31,35 +31,6 @@ export default function DropdownField({ allowEmpty = false, onChange, options, p
 
   return (
     <>
-      {open ? (
-        <View style={tw`mb-2 max-h-64 overflow-hidden rounded-2xl border shadow-sm ${palette.menu}`}>
-          <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled">
-            {dropdownOptions.length === 0 ? (
-              <View style={tw`px-4 py-4`}>
-                <Text style={tw`text-base font-bold ${palette.muted}`}>Not found</Text>
-              </View>
-            ) : dropdownOptions.map((option) => {
-              const label = option || placeholder;
-              const selected = option === value;
-              return (
-                <Pressable
-                  key={label}
-                  onPress={() => {
-                    onChange(option);
-                    setOpen(false);
-                  }}
-                  style={tw`px-4 py-4 border-b ${palette.row} ${selected ? palette.selectedRow : ""}`}
-                >
-                  <Text style={tw`text-base ${selected ? `font-bold ${palette.selectedText}` : palette.text}`}>
-                    {label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-      ) : null}
-
       <Pressable
         onPress={() => setOpen((current) => !current)}
         style={tw`min-h-13 px-4 flex-row items-center border rounded-xl ${palette.field}`}
@@ -69,6 +40,37 @@ export default function DropdownField({ allowEmpty = false, onChange, options, p
         </Text>
         {open ? <ChevronUp size={20} color={palette.icon} /> : <ChevronDown size={20} color={palette.icon} />}
       </Pressable>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <Pressable style={tw`flex-1 justify-end bg-black/35`} onPress={() => setOpen(false)}>
+          <Pressable style={tw`mx-4 mb-8 max-h-96 overflow-hidden rounded-2xl border shadow-lg ${palette.menu}`}>
+            <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always">
+              {dropdownOptions.length === 0 ? (
+                <View style={tw`px-4 py-4`}>
+                  <Text style={tw`text-base font-bold ${palette.muted}`}>Not found</Text>
+                </View>
+              ) : dropdownOptions.map((option, index) => {
+                const label = option || placeholder;
+                const selected = option === value;
+                return (
+                  <Pressable
+                    key={`${label}-${index}`}
+                    onPress={() => {
+                      onChange(option);
+                      setOpen(false);
+                    }}
+                    style={tw`px-4 py-4 border-b ${palette.row} ${selected ? palette.selectedRow : ""}`}
+                  >
+                    <Text style={tw`text-base ${selected ? `font-bold ${palette.selectedText}` : palette.text}`}>
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </>
   );
 }
