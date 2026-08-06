@@ -12,9 +12,9 @@
       "backgroundColor": "#0f766e"
     },
     "android": {
-      "icon": "./src/icon/icon-launcher.png",
+      "icon": "./src/icon/icon.png",
       "adaptiveIcon": {
-        "foregroundImage": "./src/icon/icon-launcher.png",
+        "foregroundImage": "./src/icon/icon.png",
         "backgroundColor": "#e6f8f7"
       },
       "splash": {
