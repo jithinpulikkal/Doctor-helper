@@ -44,6 +44,7 @@ export function useCustomerController() {
   const [exportingPdf, setExportingPdf] = useState(false);
   const [themeMode, setThemeModeState] = useState("light");
   const [loggedIn, setLoggedIn] = useState(false);
+  const [ready, setReady] = useState(false);
   const [dialog, setDialog] = useState(null);
 
   useEffect(() => {
@@ -60,6 +61,8 @@ export function useCustomerController() {
         setScreen(data.loggedIn ? "dashboard" : "start");
       } catch {
         showDialog("Storage error", "Saved data could not be loaded.", "error");
+      } finally {
+        setReady(true);
       }
     }
     load();
@@ -728,6 +731,7 @@ export function useCustomerController() {
     listMode: normalizeListMode(listMode),
     newType,
     profile,
+    ready,
     loggedIn,
     screen,
     selectedEntry,

@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/icon/icon.png",
+    "newArchEnabled": false,
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./src/icon/splash.png",
@@ -32,6 +33,24 @@
     },
     "assetBundlePatterns": [
       "**/*"
+    ],
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./src/icon/splash.png",
+          "backgroundColor": "#0f766e",
+          "resizeMode": "contain",
+          "imageWidth": 280,
+          "android": {
+            "image": "./src/icon/splash.png",
+            "backgroundColor": "#0f766e",
+            "resizeMode": "contain",
+            "imageWidth": 280
+          }
+        }
+      ],
+      "./plugins/withAndroidBuildFixes"
     ]
   }
 }
