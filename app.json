@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Doctor Helper",
+    "slug": "doctor-helper",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/icon/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./src/icon/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0f766e"
+    },
+    "android": {
+      "icon": "./src/icon/icon-launcher.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/icon/icon-launcher.png",
+        "backgroundColor": "#e6f8f7"
+      },
+      "splash": {
+        "image": "./src/icon/splash.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#0f766e"
+      },
+      "package": "com.rvjn.doctorhelper"
+    },
+    "ios": {
+      "icon": "./src/icon/icon.png"
+    },
+    "web": {
+      "favicon": "./src/icon/icon.png"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}

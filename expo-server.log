@@ -1,0 +1,31 @@
+npm notice run customer-requirements-app@1.0.0 npx
+npm notice run expo start --localhost --port 8082 --clear
+
+React Native / Expo is supported as a PRO feature of [33mConsole Ninja[39m [36mhttps://console-ninja.com/pro[39m.
+
+Starting project at J:\SS\app
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8082
+Logs for your project will appear below.
+J:\SS\app\node_modules\@expo\cli\build\src\utils\errors.js:130
+    throw error;
+    ^
+
+Error: ENOENT: no such file or directory, watch 'J:\SS\app\.expo-export-check\_expo\static'
+    at FSWatcher.<computed> (node:internal/fs/watchers:323:19)
+    at Object.watch (node:fs:3062:36)
+    at FallbackWatcher._watchdir (J:\SS\app\node_modules\metro-file-map\src\watchers\FallbackWatcher.js:88:24)
+    at J:\SS\app\node_modules\metro-file-map\src\watchers\FallbackWatcher.js:185:22
+    at Walker.<anonymous> (J:\SS\app\node_modules\metro-file-map\src\watchers\FallbackWatcher.js:322:31)
+    at Walker.emit (node:events:509:20)
+    at J:\SS\app\node_modules\walker\lib\walker.js:69:16
+    at FSReqCallback.oncomplete (node:fs:184:23) {
+  errno: -4058,
+  syscall: 'watch',
+  code: 'ENOENT',
+  path: 'J:\\SS\\app\\.expo-export-check\\_expo\\static',
+  filename: 'J:\\SS\\app\\.expo-export-check\\_expo\\static'
+}
+
+Node.js v26.4.0
