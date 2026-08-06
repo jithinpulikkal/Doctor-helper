@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Linking, Platform } from "react-native";
-import { defaultProfile, emptyCustomerForm, emptyStatusForm, emptyTypeForm, themes } from "../constants/appConstants";
-import { filterAndSortEntries, getNextSlno, makeForm, today } from "../models/customerModel";
+import { defaultProfile, emptyCategoryForm, emptyStatusForm, emptyTypeForm, themes } from "../constants/appConstants";
+import { filterAndSortEntries, getNextSlno, makeForm, today } from "../models/medicineModel";
 import {
   loadAppData,
-  saveCustomers,
+  saveCategories,
   saveCustomStatuses,
   saveEntries,
   saveLoggedIn,
@@ -18,27 +18,26 @@ import {
 
 export function useCustomerController() {
   const [entries, setEntries] = useState([]);
-  const [customers, setCustomers] = useState([]);
   const [customStatuses, setCustomStatuses] = useState([]);
   const [types, setTypes] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [profile, setProfile] = useState(defaultProfile);
   const [screen, setScreen] = useState("start");
   const [screenHistory, setScreenHistory] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
-  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [selectedStatusId, setSelectedStatusId] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [editingCustomerId, setEditingCustomerId] = useState(null);
   const [editingStatusId, setEditingStatusId] = useState(null);
   const [editingTypeName, setEditingTypeName] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState(null);
   const [form, setForm] = useState(makeForm());
-  const [customerForm, setCustomerForm] = useState(emptyCustomerForm);
   const [statusForm, setStatusForm] = useState(emptyStatusForm);
   const [typeForm, setTypeForm] = useState(emptyTypeForm);
+  const [categoryForm, setCategoryForm] = useState(emptyCategoryForm);
   const [listMode, setListMode] = useState("entries");
   const [newType, setNewType] = useState("");
-  const [filter, setFilter] = useState({ date: "", customer: "", type: "", status: "" });
-  const [exportFilter, setExportFilter] = useState({ fromDate: "", toDate: "", customer: "", status: "", type: "" });
+  const [filter, setFilter] = useState({ date: "", medicine: "", type: "", status: "" });
+  const [exportFilter, setExportFilter] = useState({ fromDate: "", toDate: "", medicine: "", status: "", type: "" });
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
   const [exporting, setExporting] = useState(false);
@@ -52,9 +51,9 @@ export function useCustomerController() {
       try {
         const data = await loadAppData();
         setEntries(data.entries);
-        setCustomers(data.customers);
         setCustomStatuses(data.customStatuses);
         setTypes(data.types);
+        setCategories(data.categories);
         setProfile(data.profile);
         setThemeModeState(data.themeMode);
         setLoggedIn(data.loggedIn);
@@ -71,16 +70,16 @@ export function useCustomerController() {
   }, [entries]);
 
   useEffect(() => {
-    saveCustomers(customers);
-  }, [customers]);
-
-  useEffect(() => {
     saveCustomStatuses(customStatuses);
   }, [customStatuses]);
 
   useEffect(() => {
     saveTypes(types);
   }, [types]);
+
+  useEffect(() => {
+    saveCategories(categories);
+  }, [categories]);
 
   useEffect(() => {
     saveProfile(profile);
@@ -93,11 +92,6 @@ export function useCustomerController() {
   const selectedEntry = useMemo(
     () => entries.find((entry) => entry.id === selectedId),
     [entries, selectedId]
-  );
-
-  const selectedCustomer = useMemo(
-    () => customers.find((customer) => customer.id === selectedCustomerId),
-    [customers, selectedCustomerId]
   );
 
   const selectedStatus = useMemo(
@@ -136,10 +130,10 @@ export function useCustomerController() {
         .filter((entry) => {
           const matchesFrom = exportFilter.fromDate ? entry.date >= exportFilter.fromDate : true;
           const matchesTo = exportFilter.toDate ? entry.date <= exportFilter.toDate : true;
-          const matchesCustomer = exportFilter.customer ? entry.name === exportFilter.customer : true;
+          const matchesMedicine = exportFilter.medicine ? entry.name === exportFilter.medicine : true;
           const matchesStatus = exportFilter.status ? entry.status === exportFilter.status : true;
           const matchesType = exportFilter.type ? entry.type === exportFilter.type : true;
-          return matchesFrom && matchesTo && matchesCustomer && matchesStatus && matchesType;
+          return matchesFrom && matchesTo && matchesMedicine && matchesStatus && matchesType;
         })
         .sort((left, right) => {
           const leftSlno = Number(left.slno);
@@ -173,12 +167,12 @@ export function useCustomerController() {
       "current entries": "entries",
       entry: "entries",
       entries: "entries",
-      customer: "customers",
-      customers: "customers",
       status: "statuses",
       statuses: "statuses",
       type: "types",
-      types: "types"
+      types: "types",
+      category: "categories",
+      categories: "categories"
     };
 
     return aliases[normalized] || "entries";
@@ -200,10 +194,6 @@ export function useCustomerController() {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function setCustomerField(field, value) {
-    setCustomerForm((current) => ({ ...current, [field]: value }));
-  }
-
   function setStatusField(field, value) {
     setStatusForm((current) => ({ ...current, [field]: value }));
   }
@@ -212,15 +202,14 @@ export function useCustomerController() {
     setTypeForm((current) => ({ ...current, [field]: value }));
   }
 
+  function setCategoryField(field, value) {
+    setCategoryForm((current) => ({ ...current, [field]: value }));
+  }
+
   function resetEntryForm() {
     setEditingId(null);
     setForm(makeForm());
     setNewType("");
-  }
-
-  function resetCustomerForm() {
-    setEditingCustomerId(null);
-    setCustomerForm(emptyCustomerForm);
   }
 
   function resetStatusForm() {
@@ -231,6 +220,11 @@ export function useCustomerController() {
   function resetTypeForm() {
     setEditingTypeName(null);
     setTypeForm(emptyTypeForm);
+  }
+
+  function resetCategoryForm() {
+    setEditingCategoryName(null);
+    setCategoryForm(emptyCategoryForm);
   }
 
   function navigate(nextScreen) {
@@ -288,12 +282,6 @@ export function useCustomerController() {
     navigate("form");
   }
 
-  function openCustomerCreate() {
-    setEditingCustomerId(null);
-    setCustomerForm(emptyCustomerForm);
-    navigate("customerForm");
-  }
-
   function openStatusCreate() {
     setEditingStatusId(null);
     setStatusForm(emptyStatusForm);
@@ -306,22 +294,17 @@ export function useCustomerController() {
     navigate("typeForm");
   }
 
+  function openCategoryCreate() {
+    setEditingCategoryName(null);
+    setCategoryForm(emptyCategoryForm);
+    navigate("categoryForm");
+  }
+
   function openEdit(entry) {
     setEditingId(entry.id);
     setForm(makeForm(entry));
     setNewType("");
     navigate("form");
-  }
-
-  function openCustomerEdit(customer) {
-    setEditingCustomerId(customer.id);
-    setCustomerForm({
-      name: customer.name || "",
-      details: customer.details || "",
-      location: customer.location || "",
-      phone: customer.phone || ""
-    });
-    navigate("customerForm");
   }
 
   function openStatusEdit(status) {
@@ -336,13 +319,10 @@ export function useCustomerController() {
     navigate("typeForm");
   }
 
-  function applyCustomerToEntry(customerName) {
-    const customer = customers.find((item) => item.name === customerName);
-    setForm((current) => ({
-      ...current,
-      name: customerName,
-      phone: customer?.phone || current.phone
-    }));
+  function openCategoryEdit(categoryName) {
+    setEditingCategoryName(categoryName);
+    setCategoryForm({ name: categoryName || "" });
+    navigate("categoryForm");
   }
 
   function buildMedicineSearchUrl(entry) {
@@ -389,20 +369,11 @@ export function useCustomerController() {
     return items.some((item) => `${getValue(item) || ""}`.trim().toLowerCase() === normalizedText);
   }
 
-  function findCustomerByPhone(phone, ignoreId = null) {
-    const normalizedPhone = `${phone || ""}`.trim();
-    if (!normalizedPhone) {
-      return null;
-    }
-
-    return customers.find(
-      (customer) => customer.id !== ignoreId && `${customer.phone || ""}`.trim() === normalizedPhone
-    );
-  }
-
   function saveEntry() {
     const finalName = form.name.trim();
     const finalPhone = form.phone.trim();
+    const finalDetails = form.details.trim();
+    const finalLocation = form.location.trim();
     const finalType = form.type.trim();
     const finalStatus = form.status.trim();
     const finalDate = form.date || today();
@@ -417,33 +388,12 @@ export function useCustomerController() {
       return;
     }
 
-    const existingCustomerByPhone = findCustomerByPhone(finalPhone);
-    if (existingCustomerByPhone && existingCustomerByPhone.name !== finalName) {
-      showDialog(
-        "Duplicate customer",
-        `This phone number is already saved for ${existingCustomerByPhone.name}. Select that customer or use another phone number.`,
-        "warning"
-      );
-      return;
-    }
-
-    if (!existingCustomerByPhone && !hasTextMatch(customers, finalName, (customer) => customer.name)) {
-      setCustomers((current) => [
-        {
-          id: `${Date.now()}-customer`,
-          name: finalName,
-          details: "",
-          location: "",
-          phone: finalPhone,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        ...current
-      ]);
-    }
-
     if (!hasTextMatch(types, finalType)) {
       setTypes((current) => [finalType, ...current]);
+    }
+
+    if (finalLocation && !hasTextMatch(categories, finalLocation)) {
+      setCategories((current) => [finalLocation, ...current]);
     }
 
     if (finalStatus && !hasTextMatch(customStatuses, finalStatus, (status) => status.name)) {
@@ -463,6 +413,8 @@ export function useCustomerController() {
       date: finalDate,
       name: finalName,
       phone: finalPhone,
+      details: finalDetails,
+      location: finalLocation,
       detail1: form.alternates || form.detail1,
       detail2: form.usedFor || form.detail2,
       detail3: form.dosage || form.detail3,
@@ -495,59 +447,6 @@ export function useCustomerController() {
     resetEntryForm();
     replaceScreen("detail");
     showDialog("Medicine saved", "The medicine details have been saved successfully.", "success");
-  }
-
-  function saveCustomer() {
-    const name = customerForm.name.trim();
-    const phone = customerForm.phone.trim();
-
-    if (!name) {
-      showDialog("Missing details", "Medicine name is required.", "warning");
-      return;
-    }
-
-    const duplicateCustomer = findCustomerByPhone(phone, editingCustomerId);
-    if (duplicateCustomer) {
-      showDialog(
-        "Duplicate medicine",
-        `This manufacturer or brand value is already saved for ${duplicateCustomer.name}. Use a different value.`,
-        "warning"
-      );
-      return;
-    }
-
-    const payload = {
-      ...customerForm,
-      name,
-      phone,
-      updatedAt: new Date().toISOString()
-    };
-
-    if (editingCustomerId) {
-      const previousCustomer = customers.find((customer) => customer.id === editingCustomerId);
-      setCustomers((current) =>
-        current.map((customer) => (customer.id === editingCustomerId ? { ...customer, ...payload } : customer))
-      );
-      if (previousCustomer?.name) {
-        setEntries((current) =>
-          current.map((entry) =>
-            entry.name === previousCustomer.name
-              ? { ...entry, name: payload.name, phone: payload.phone, updatedAt: new Date().toISOString() }
-              : entry
-          )
-        );
-      }
-    } else {
-      setCustomers((current) => [{ ...payload, id: `${Date.now()}`, createdAt: new Date().toISOString() }, ...current]);
-    }
-    resetCustomerForm();
-    changeListMode("customers");
-    replaceScreen("list");
-    showDialog(
-      editingCustomerId ? "Medicine updated" : "Medicine saved",
-      "The medicine reference details have been saved successfully.",
-      "success"
-    );
   }
 
   function saveCustomStatus() {
@@ -618,6 +517,38 @@ export function useCustomerController() {
     );
   }
 
+  function saveCategory() {
+    const name = categoryForm.name.trim();
+    if (!name) {
+      showDialog("Missing details", "Category name is required.", "warning");
+      return;
+    }
+
+    if (categories.some((category) => category !== editingCategoryName && `${category || ""}`.trim().toLowerCase() === name.toLowerCase())) {
+      showDialog("Duplicate category", "This category name already exists.", "warning");
+      return;
+    }
+
+    if (editingCategoryName) {
+      setCategories((current) => current.map((category) => (category === editingCategoryName ? name : category)));
+      setEntries((current) =>
+        current.map((entry) =>
+          entry.location === editingCategoryName ? { ...entry, location: name, updatedAt: new Date().toISOString() } : entry
+        )
+      );
+    } else {
+      setCategories((current) => [name, ...current]);
+    }
+    resetCategoryForm();
+    changeListMode("categories");
+    replaceScreen("list");
+    showDialog(
+      editingCategoryName ? "Category updated" : "Category saved",
+      "The category option has been saved successfully.",
+      "success"
+    );
+  }
+
   function confirmDelete(title, message, onConfirm) {
     showDialog(title, message, "danger", [
       { text: "Cancel" },
@@ -630,21 +561,6 @@ export function useCustomerController() {
       setEntries((current) => current.filter((entry) => entry.id !== id));
       setSelectedId(null);
       changeListMode("entries");
-      replaceScreen("list");
-    });
-  }
-
-  function deleteCustomer(id) {
-    confirmDelete("Delete medicine name ?", "This saved medicine reference will be removed permanently.", () => {
-      const deletedCustomer = customers.find((item) => item.id === id);
-      setCustomers((current) => current.filter((item) => item.id !== id));
-      if (deletedCustomer?.name) {
-        setFilter((current) => ({
-          ...current,
-          customer: current.customer === deletedCustomer.name ? "" : current.customer
-        }));
-      }
-      changeListMode("customers");
       replaceScreen("list");
     });
   }
@@ -689,6 +605,31 @@ export function useCustomerController() {
       setNewType((current) => (`${current || ""}`.trim() === normalizedName ? "" : current));
       setEditingTypeName((current) => (`${current || ""}`.trim() === normalizedName ? null : current));
       changeListMode("types");
+      replaceScreen("list");
+    });
+  }
+
+  function deleteCategory(categoryName) {
+    const normalizedName = `${categoryName || ""}`.trim();
+    if (!normalizedName) {
+      return;
+    }
+
+    confirmDelete("Delete category ?", "This category option will be removed permanently.", () => {
+      setCategories((current) => current.filter((category) => `${category || ""}`.trim() !== normalizedName));
+      setEntries((current) =>
+        current.map((entry) =>
+          `${entry.location || ""}`.trim() === normalizedName
+            ? { ...entry, location: "", updatedAt: new Date().toISOString() }
+            : entry
+        )
+      );
+      setForm((current) => ({
+        ...current,
+        location: `${current.location || ""}`.trim() === normalizedName ? "" : current.location
+      }));
+      setEditingCategoryName((current) => (`${current || ""}`.trim() === normalizedName ? null : current));
+      changeListMode("categories");
       replaceScreen("list");
     });
   }
@@ -766,11 +707,11 @@ export function useCustomerController() {
 
   return {
     entries,
+    categories,
+    categoryForm,
     exportEntriesList,
     exportFilter,
-    customers,
     customStatuses,
-    customerForm,
     dialog,
     editing: Boolean(editingId),
     exporting,
@@ -783,7 +724,6 @@ export function useCustomerController() {
     loggedIn,
     screen,
     selectedEntry,
-    selectedCustomer,
     selectedStatus,
     sortBy,
     sortDir,
@@ -795,10 +735,9 @@ export function useCustomerController() {
     typeForm,
     visibleEntries,
     statusOptions,
-    applyCustomerToEntry,
     buildMedicineSearchUrl,
     closeDialog,
-    deleteCustomer,
+    deleteCategory,
     deleteEntry,
     deleteCustomStatus,
     deleteType,
@@ -807,8 +746,8 @@ export function useCustomerController() {
     login,
     logout,
     openCreate,
-    openCustomerCreate,
-    openCustomerEdit,
+    openCategoryCreate,
+    openCategoryEdit,
     openEdit,
     openMedicineResearch,
     openResearchInBrowser,
@@ -817,12 +756,12 @@ export function useCustomerController() {
     openStatusEdit,
     openTypeCreate,
     openTypeEdit,
-    saveCustomer,
+    saveCategory,
     saveCustomStatus,
     saveEntry,
     saveType,
     showDialog,
-    setCustomerField,
+    setCategoryField,
     setExportFilter,
     setField,
     setFilter,
@@ -831,7 +770,6 @@ export function useCustomerController() {
     setProfile,
     setScreen: navigate,
     setSelectedId,
-    setSelectedCustomerId,
     setSelectedStatusId,
     setSortBy,
     setSortDir,

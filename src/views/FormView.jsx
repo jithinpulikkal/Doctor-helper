@@ -40,9 +40,9 @@ export default function FormView({ controller }) {
                                 <AutocompleteField
                                     placeholder="Type medicine name"
                                     value={controller.form.name}
-                                    options={controller.customers.map((customer) => customer.name)}
+                                    options={Array.from(new Set(controller.entries.map((entry) => entry.name).filter(Boolean)))}
                                     onChange={(value) => controller.setField("name", value)}
-                                    onSelect={controller.applyCustomerToEntry}
+                                    onSelect={(value) => controller.setField("name", value)}
                                     variant={controller.themeMode}
                                 />
                             </ThemedField>
@@ -54,6 +54,26 @@ export default function FormView({ controller }) {
                                     placeholder="Company, brand, or strength"
                                     placeholderTextColor={placeholderColor}
                                     style={inputStyle}
+                                />
+                            </ThemedField>
+                            <ThemedField controller={controller} label="Details">
+                                <TextInput
+                                    multiline
+                                    value={controller.form.details}
+                                    onChangeText={(value) => controller.setField("details", value)}
+                                    placeholder="Composition, strengths, common brands, or remarks"
+                                    placeholderTextColor={placeholderColor}
+                                    style={[inputStyle, tw`min-h-28 py-4`]}
+                                    textAlignVertical="top"
+                                />
+                            </ThemedField>
+                            <ThemedField controller={controller} label="Category">
+                                <AutocompleteField
+                                    placeholder="Antibiotic, analgesic, antihistamine..."
+                                    value={controller.form.location}
+                                    options={controller.categories}
+                                    onChange={(value) => controller.setField("location", value)}
+                                    variant={controller.themeMode}
                                 />
                             </ThemedField>
                             <ThemedField controller={controller} label="Alternates">

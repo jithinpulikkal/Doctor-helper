@@ -4,17 +4,17 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 import * as XLSX from "xlsx";
-import { defaultProfile, defaultTypes, STORAGE_KEYS } from "../constants/appConstants";
-import { toExcelRows } from "./customerModel";
+import { defaultCategories, defaultProfile, defaultTypes, STORAGE_KEYS } from "../constants/appConstants";
+import { toExcelRows } from "./medicineModel";
 
 const legacyPresetTypes = ["General", "Urgent", "Service", "Sales", "Follow Up"];
 
 export async function loadAppData() {
-  const [savedEntries, savedCustomers, savedCustomStatuses, savedTypes, savedProfile, savedLoggedIn, savedTheme] = await Promise.all([
+  const [savedEntries, savedCustomStatuses, savedTypes, savedCategories, savedProfile, savedLoggedIn, savedTheme] = await Promise.all([
     AsyncStorage.getItem(STORAGE_KEYS.entries),
-    AsyncStorage.getItem(STORAGE_KEYS.customers),
     AsyncStorage.getItem(STORAGE_KEYS.customStatuses),
     AsyncStorage.getItem(STORAGE_KEYS.types),
+    AsyncStorage.getItem(STORAGE_KEYS.categories),
     AsyncStorage.getItem(STORAGE_KEYS.profile),
     AsyncStorage.getItem(STORAGE_KEYS.loggedIn),
     AsyncStorage.getItem(STORAGE_KEYS.theme)
@@ -22,11 +22,11 @@ export async function loadAppData() {
 
   return {
     entries: savedEntries ? JSON.parse(savedEntries) : [],
-    customers: savedCustomers ? JSON.parse(savedCustomers) : [],
     customStatuses: savedCustomStatuses ? JSON.parse(savedCustomStatuses) : [],
-    types: savedTypes
-      ? JSON.parse(savedTypes).filter((type) => !legacyPresetTypes.includes(type))
-      : defaultTypes,
+	    types: savedTypes
+	      ? JSON.parse(savedTypes).filter((type) => !legacyPresetTypes.includes(type))
+	      : defaultTypes,
+	    categories: savedCategories ? JSON.parse(savedCategories) : defaultCategories,
     profile: savedProfile ? JSON.parse(savedProfile) : defaultProfile,
     loggedIn: savedLoggedIn === "true",
     themeMode: savedTheme || "light"
@@ -36,14 +36,14 @@ export async function loadAppData() {
 export const saveEntries = (entries) =>
   AsyncStorage.setItem(STORAGE_KEYS.entries, JSON.stringify(entries));
 
-export const saveCustomers = (customers) =>
-  AsyncStorage.setItem(STORAGE_KEYS.customers, JSON.stringify(customers));
-
 export const saveCustomStatuses = (customStatuses) =>
   AsyncStorage.setItem(STORAGE_KEYS.customStatuses, JSON.stringify(customStatuses));
 
 export const saveTypes = (types) =>
   AsyncStorage.setItem(STORAGE_KEYS.types, JSON.stringify(types));
+
+export const saveCategories = (categories) =>
+  AsyncStorage.setItem(STORAGE_KEYS.categories, JSON.stringify(categories));
 
 export const saveProfile = (profile) =>
   AsyncStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile));
@@ -107,7 +107,7 @@ async function writeCsvFile(entries) {
 
 async function writeExcelXmlFile(entries) {
   const { rows } = createWorkbook(entries);
-  const headers = rows.length ? Object.keys(rows[0]) : [ "SL No", "Date", "Medicine Name", "Manufacturer", "Alternates", "Used For", "Dosage", "Warnings", "Type", "Availability", "Notes"];
+  const headers = rows.length ? Object.keys(rows[0]) : [ "SL No", "Date", "Medicine Name", "Manufacturer", "Details", "Category", "Alternates", "Used For", "Dosage", "Warnings", "Type", "Availability", "Notes"];
   const tableRows = [
     `<Row>${headers.map((header) => `<Cell><Data ss:Type="String">${escapeHtml(header)}</Data></Cell>`).join("")}</Row>`,
     ...rows.map((row) =>
@@ -245,6 +245,8 @@ function buildPdfHtml(entries, profile, stats, filter = {}) {
           <td>${escapeHtml(entry.date || "-")}</td>
           <td class="strong">${escapeHtml(entry.name || "-")}</td>
           <td>${escapeHtml(entry.phone || "-")}</td>
+          <td>${escapeHtml(entry.details || "-")}</td>
+          <td>${escapeHtml(entry.location || "-")}</td>
           <td>${escapeHtml(entry.alternates || entry.detail1 || "-")}</td>
           <td>${escapeHtml(entry.usedFor || entry.detail2 || "-")}</td>
           <td>${escapeHtml(entry.dosage || entry.detail3 || "-")}</td>
@@ -447,7 +449,7 @@ function buildPdfHtml(entries, profile, stats, filter = {}) {
             <table class="details">
               <tr><td>From Date</td><td>${escapeHtml(filterValue(filter.fromDate))}</td></tr>
               <tr><td>To Date</td><td>${escapeHtml(filterValue(filter.toDate))}</td></tr>
-              <tr><td>Medicine</td><td>${escapeHtml(filterValue(filter.customer))}</td></tr>
+              <tr><td>Medicine</td><td>${escapeHtml(filterValue(filter.medicine))}</td></tr>
               <tr><td>Availability</td><td>${escapeHtml(filterValue(filter.status))}</td></tr>
               <tr><td>Type</td><td>${escapeHtml(filterValue(filter.type))}</td></tr>
             </table>
@@ -478,18 +480,20 @@ function buildPdfHtml(entries, profile, stats, filter = {}) {
             <tr>
               <th style="width: 4%;">SL</th>
               <th style="width: 9%;">Date</th>
-              <th style="width: 12%;">Medicine</th>
-              <th style="width: 9%;">Brand</th>
-              <th style="width: 10%;">Alternates</th>
-              <th style="width: 10%;">Used For</th>
-              <th style="width: 9%;">Dosage</th>
-              <th style="width: 9%;">Warnings</th>
-              <th style="width: 10%;">Type</th>
-              <th style="width: 10%;">Availability</th>
-              <th style="width: 13%;">Notes</th>
+              <th style="width: 10%;">Medicine</th>
+              <th style="width: 8%;">Brand</th>
+              <th style="width: 9%;">Details</th>
+              <th style="width: 8%;">Category</th>
+              <th style="width: 9%;">Alternates</th>
+              <th style="width: 9%;">Used For</th>
+              <th style="width: 8%;">Dosage</th>
+              <th style="width: 8%;">Warnings</th>
+              <th style="width: 8%;">Type</th>
+              <th style="width: 8%;">Availability</th>
+              <th style="width: 9%;">Notes</th>
             </tr>
           </thead>
-          <tbody>${rows || `<tr><td colspan="11">No entries found.</td></tr>`}</tbody>
+	          <tbody>${rows || `<tr><td colspan="13">No entries found.</td></tr>`}</tbody>
           </table>
         </div>
 

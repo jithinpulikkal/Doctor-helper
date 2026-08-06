@@ -1,4 +1,4 @@
-import { Edit3, FlaskConical, Globe2, Pill, Tag, Trash2 } from "lucide-react-native";
+import { Edit3, FlaskConical, Globe2, Layers3, Pill, Tag, Trash2 } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
 import Header from "../components/Header";
@@ -76,7 +76,14 @@ export default function DetailView({ controller, entry }) {
                 >
                     <Text style={tw`text-lg font-black ${controller.theme.text}`}>Medicine information</Text>
                     <View style={tw`mt-3`}>
-                        <InfoRow controller={controller} icon={FlaskConical} label="Manufacturer / Brand" value={manufacturer || "-"} />
+                        <InfoRow controller={controller} icon={Layers3} label="Category" value={entry.location || "-"} />
+                        <InfoRow
+                            controller={controller}
+                            icon={FlaskConical}
+                            label="Manufacturer / Brand"
+                            value={manufacturer || "-"}
+                        />
+
                         <InfoRow controller={controller} icon={Tag} label="Type" value={entry.type || "-"} last />
                     </View>
                 </View>
@@ -85,10 +92,11 @@ export default function DetailView({ controller, entry }) {
                     style={tw`mt-4 p-5 ${controller.theme.card} border ${controller.theme.border} rounded-[28px] shadow-sm`}
                 >
                     <Text style={tw`text-lg font-black ${controller.theme.text}`}>Clinical details</Text>
-                    <DetailBlock controller={controller} label="Alternates" value={entry.alternates || entry.detail1} />
+                    <DetailBlock controller={controller} label="Details" value={entry.details} />
                     <DetailBlock controller={controller} label="Used For" value={entry.usedFor || entry.detail2} />
                     <DetailBlock controller={controller} label="Dosage" value={entry.dosage || entry.detail3} />
                     <DetailBlock controller={controller} label="Warnings / Contraindications" value={entry.warnings} />
+                    <DetailBlock controller={controller} label="Alternates" value={entry.alternates || entry.detail1} />
                     <DetailBlock controller={controller} label="Notes" value={entry.notes} last />
                 </View>
             </ScrollView>

@@ -1,8 +1,8 @@
 export const STORAGE_KEYS = {
   entries: "customer_requirement_entries_v1",
-  customers: "customer_requirement_customers_v1",
   customStatuses: "customer_requirement_custom_statuses_v1",
   types: "customer_requirement_types_v1",
+  categories: "customer_requirement_categories_v1",
   profile: "customer_requirement_profile_v1",
   loggedIn: "customer_requirement_logged_in_v1",
   theme: "customer_requirement_theme_v1"
@@ -60,6 +60,8 @@ export const themes = {
 
 export const defaultTypes = ["Tablet", "Capsule", "Syrup", "Injection", "Drops", "Ointment", "Inhaler"];
 
+export const defaultCategories = ["Antibiotic", "Analgesic", "Antihistamine", "Antacid", "Vitamin", "Antifungal"];
+
 export const defaultProfile = {
   businessName: "Doctor Helper",
   ownerName: "",
@@ -74,6 +76,8 @@ export const emptyForm = {
   slno: "",
   name: "",
   phone: "",
+  details: "",
+  location: "",
   detail1: "",
   detail2: "",
   detail3: "",
@@ -86,17 +90,14 @@ export const emptyForm = {
   status: ""
 };
 
-export const emptyCustomerForm = {
-  name: "",
-  details: "",
-  location: "",
-  phone: ""
-};
-
 export const emptyStatusForm = {
   name: ""
 };
 
 export const emptyTypeForm = {
+  name: ""
+};
+
+export const emptyCategoryForm = {
   name: ""
 };

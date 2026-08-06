@@ -43,7 +43,7 @@ export default function AutocompleteField({
 
   return (
     <View>
-      <View style={tw`min-h-13 px-4 flex-row items-center border rounded-2xl ${inputTheme}`}>
+      <View style={tw`min-h-13 px-4 flex-row items-center border ${visibleOptions.length ? "rounded-t-2xl rounded-b-none" : "rounded-2xl"} ${inputTheme}`}>
         <TextInput
           value={value}
           onChangeText={onChange}
@@ -60,7 +60,7 @@ export default function AutocompleteField({
       </View>
 
       {visibleOptions.length ? (
-        <View style={tw`mt-2 overflow-hidden rounded-2xl border ${dark ? "bg-[#232323] border-[#3a3a3a]" : "bg-white border-[#edf0f4]"}`}>
+        <View style={tw`mt-1 max-h-48 overflow-hidden rounded-b-2xl border border-t-0 ${dark ? "bg-[#232323] border-[#3a3a3a]" : "bg-white border-[#dde2ea]"}`}>
           {visibleOptions.map((option) => {
             const selected = option.toLowerCase() === normalizedValue;
             return (
@@ -68,10 +68,10 @@ export default function AutocompleteField({
                 key={option}
                 onPress={() => selectOption(option)}
                 style={tw`px-4 py-3 border-b ${dark ? "border-[#3a3a3a]" : "border-[#edf0f4]"} ${
-                  selected ? (dark ? "bg-[#3a3a3a]" : "bg-[#fff2ef]") : ""
+                  selected ? (dark ? "bg-[#303030]" : "bg-[#e7e7e9]") : ""
                 }`}
               >
-                <Text style={tw`text-base ${selected ? "font-black" : ""} ${dark ? "text-[#f4f1ea]" : "text-[#20252d]"}`}>
+                <Text style={tw`text-sm ${selected ? "font-bold" : ""} ${dark ? "text-[#f4f1ea]" : "text-[#20252d]"}`}>
                   {option}
                 </Text>
               </Pressable>

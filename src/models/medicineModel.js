@@ -16,6 +16,8 @@ export const makeForm = (entry) => ({
   slno: entry?.slno || "",
   name: entry?.name || "",
   phone: entry?.phone || "",
+  details: entry?.details || "",
+  location: entry?.location || "",
   detail1: entry?.detail1 || "",
   detail2: entry?.detail2 || "",
   detail3: entry?.detail3 || "",
@@ -31,10 +33,10 @@ export const makeForm = (entry) => ({
 export const filterAndSortEntries = (entries, filter, sortBy, sortDir) => {
   const filtered = entries.filter((entry) => {
     const matchesDate = filter.date ? entry.date.includes(filter.date) : true;
-    const matchesCustomer = filter.customer ? entry.name === filter.customer : true;
+    const matchesMedicine = filter.medicine ? entry.name === filter.medicine : true;
     const matchesType = filter.type ? entry.type === filter.type : true;
     const matchesStatus = filter.status ? entry.status === filter.status : true;
-    return matchesDate && matchesCustomer && matchesType && matchesStatus;
+    return matchesDate && matchesMedicine && matchesType && matchesStatus;
   });
 
   return filtered.sort((a, b) => {
@@ -52,6 +54,8 @@ export const toExcelRows = (entries) =>
     Date: entry.date,
     "Medicine Name": entry.name,
     Manufacturer: entry.phone,
+    Details: entry.details,
+    Category: entry.location,
     Alternates: entry.alternates || entry.detail1,
     "Used For": entry.usedFor || entry.detail2,
     Dosage: entry.dosage || entry.detail3,

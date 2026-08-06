@@ -103,9 +103,9 @@ export default function ProfileView({ controller }) {
                             />
                             <InfoPill
                                 controller={controller}
-                                icon={UserRound}
-                                label="Names"
-                                value={controller.customers.length}
+                                icon={Layers3}
+                                label="Categories"
+                                value={controller.categories.length}
                             />
                         </View>
                     </View>

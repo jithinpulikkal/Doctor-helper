@@ -1,4 +1,4 @@
-import { ClipboardList, ListPlus, Pill } from "lucide-react-native";
+import { ListPlus, Pill, Tag } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
 import Header from "../components/Header";
@@ -17,17 +17,17 @@ export default function NewEntryView({ controller }) {
         />
         <OptionCard
           controller={controller}
-          description="Save a medicine name with brand, maker, and reference details."
-          icon={Pill}
-          onPress={controller.openCustomerCreate}
-          title="Medicine Name"
-        />
-        <OptionCard
-          controller={controller}
           description="Add an availability option such as available, low stock, or unavailable."
           icon={ListPlus}
           onPress={controller.openStatusCreate}
           title="Availability"
+        />
+        <OptionCard
+          controller={controller}
+          description="Add a medicine category such as antibiotic, analgesic, or antihistamine."
+          icon={Tag}
+          onPress={controller.openCategoryCreate}
+          title="Medicine Category"
         />
         <OptionCard
           controller={controller}

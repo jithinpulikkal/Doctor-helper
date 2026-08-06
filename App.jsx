@@ -5,7 +5,7 @@ import tw from "twrnc";
 import AppDialog from "./src/components/AppDialog";
 import BottomBar from "./src/components/BottomBar";
 import { useCustomerController } from "./src/controllers/useCustomerController";
-import CustomerFormView from "./src/views/CustomerFormView";
+import CategoryFormView from "./src/views/CategoryFormView";
 import DetailView from "./src/views/DetailView";
 import ExportView from "./src/views/ExportView";
 import FormView from "./src/views/FormView";
@@ -48,7 +48,7 @@ function AppShell() {
         return true;
       }
 
-      if (["detail", "form", "login", "newEntry", "customerForm", "statusForm", "typeForm", "research"].includes(controller.screen)) {
+      if (["detail", "form", "login", "newEntry", "categoryForm", "statusForm", "typeForm", "research"].includes(controller.screen)) {
         controller.goBack(controller.loggedIn ? "dashboard" : "start");
         return true;
       }
@@ -80,7 +80,7 @@ function AppShell() {
         {controller.screen === "export" && <ExportView controller={controller} />}
         {controller.screen === "newEntry" && <NewEntryView controller={controller} />}
         {controller.screen === "form" && <FormView controller={controller} />}
-        {controller.screen === "customerForm" && <CustomerFormView controller={controller} />}
+        {controller.screen === "categoryForm" && <CategoryFormView controller={controller} />}
         {controller.screen === "statusForm" && <StatusFormView controller={controller} />}
         {controller.screen === "typeForm" && <TypeFormView controller={controller} />}
         {controller.screen === "detail" && controller.selectedEntry && (

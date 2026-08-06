@@ -1,4 +1,4 @@
-import { ClipboardList, Layers3, ListPlus, Pill, UserRound } from "lucide-react-native";
+import { Layers3, ListPlus, Pill, Tag } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import tw from "twrnc";
@@ -8,9 +8,9 @@ export default function DashboardView({ controller }) {
     const totalRecords = controller.entries.length;
     const savedDataTotal =
         controller.entries.length +
-        controller.customers.length +
         controller.customStatuses.length +
-        controller.types.length;
+        controller.types.length +
+        controller.categories.length;
     const openList = (mode) => {
         controller.setListMode(mode);
         controller.setScreen("list");
@@ -25,12 +25,12 @@ export default function DashboardView({ controller }) {
             onPress: () => openList("entries"),
         },
         {
-            key: "customers",
-            label: "Names",
-            value: controller.customers.length,
+            key: "categories",
+            label: "Category",
+            value: controller.categories.length,
             color: "#16a34a",
-            icon: UserRound,
-            onPress: () => openList("customers"),
+            icon: Tag,
+            onPress: () => openList("categories"),
         },
         {
             key: "statuses",
@@ -77,9 +77,9 @@ export default function DashboardView({ controller }) {
                         /> */}
                         <HeroMetric
                             controller={controller}
-                            label="Medicine Names"
-                            value={controller.customers.length}
-                            onPress={() => openList("customers")}
+                            label="Medicine Categories"
+                            value={controller.categories.length}
+                            onPress={() => openList("categories")}
                         />
                     </View>
                 </View>

@@ -10,7 +10,7 @@ export default function ExportView({ controller }) {
   const exportFilterCount = [
     controller.exportFilter.fromDate,
     controller.exportFilter.toDate,
-    controller.exportFilter.customer,
+    controller.exportFilter.medicine,
     controller.exportFilter.status,
     controller.exportFilter.type
   ].filter(Boolean).length;
@@ -60,9 +60,9 @@ export default function ExportView({ controller }) {
             <Field label="Medicine" labelClass={controller.theme.muted}>
               <DropdownField
                 placeholder="All medicines"
-                value={controller.exportFilter.customer}
-                options={controller.customers.map((customer) => customer.name)}
-                onChange={(customer) => controller.setExportFilter({ ...controller.exportFilter, customer })}
+                value={controller.exportFilter.medicine}
+                options={Array.from(new Set(controller.entries.map((entry) => entry.name).filter(Boolean)))}
+                onChange={(medicine) => controller.setExportFilter({ ...controller.exportFilter, medicine })}
                 allowEmpty
                 variant={controller.themeMode}
               />
@@ -90,7 +90,7 @@ export default function ExportView({ controller }) {
           </View>
 
           <Pressable
-            onPress={() => controller.setExportFilter({ fromDate: "", toDate: "", customer: "", status: "", type: "" })}
+            onPress={() => controller.setExportFilter({ fromDate: "", toDate: "", medicine: "", status: "", type: "" })}
             style={tw`h-12 mt-4 items-center justify-center rounded-2xl ${controller.theme.cardAlt}`}
           >
             <Text style={tw`text-sm font-black ${controller.theme.muted}`}>Clear Conditions</Text>

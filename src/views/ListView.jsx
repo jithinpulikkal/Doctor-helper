@@ -5,19 +5,16 @@ import {
     ClipboardList,
     Edit3,
     Layers3,
-    MapPin,
     Pill,
-    Phone,
     Plus,
     Search,
     SlidersHorizontal,
+    Tag,
     Trash2,
-    UserRound,
 } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
-import DatePickerField from "../components/DatePickerField";
 import DropdownField from "../components/DropdownField";
 import Field from "../components/Field";
 import Header from "../components/Header";
@@ -26,13 +23,12 @@ export default function ListView({ controller }) {
     const [filtersOpen, setFiltersOpen] = useState(false);
     const listTabs = [
         { key: "entries", label: "Medicines" },
-        // Names tab hidden for now. Keep the medicine-name library code below because it may be needed again.
-        // { key: "customers", label: "Names" },
+        { key: "categories", label: "Category" },
         // Stock tab hidden for now. Keep the status list code below because it may be needed again.
         // { key: "statuses", label: "Stock" },
         { key: "types", label: "Types" },
     ];
-    const activeFilters = [controller.filter.date, controller.filter.customer, controller.filter.type, controller.filter.status].filter(Boolean).length;
+    const activeFilters = [controller.filter.medicine, controller.filter.type].filter(Boolean).length;
 
     return (
         <View style={tw`flex-1 ${controller.theme.page}`}>
@@ -73,9 +69,7 @@ export default function ListView({ controller }) {
                                     <Text style={tw`text-3xl font-black ${controller.theme.text}`}>
                                         {controller.visibleEntries.length}
                                     </Text>
-                                    <Text style={tw`text-sm font-bold ${controller.theme.muted}`}>
-                                        Medicine List
-                                    </Text>
+                                    <Text style={tw`text-sm font-bold ${controller.theme.muted}`}>Medicine List</Text>
                                 </View>
                                 <AddListButton controller={controller} onPress={controller.openEntryCreate} />
                             </View>
@@ -93,12 +87,14 @@ export default function ListView({ controller }) {
                                 {activeFilters ? (
                                     <>
                                         <View style={tw`mr-2 px-3 py-1 rounded-full ${controller.theme.accentBg}`}>
-                                            <Text style={tw`text-xs font-black ${controller.theme.accentText}`}>
+                                            <Text style={tw`text-center text-xs font-black ${controller.theme.accentText}`}>
                                                 {activeFilters}
                                             </Text>
                                         </View>
                                         <Pressable
-                                            onPress={() => controller.setFilter({ date: "", customer: "", type: "", status: "" })}
+                                            onPress={() =>
+                                                controller.setFilter({ date: "", medicine: "", type: "", status: "" })
+                                            }
                                             style={tw`mr-3 px-3 py-1.5 rounded-full ${controller.theme.cardAlt}`}
                                         >
                                             <Text style={tw`text-[10px] font-black ${controller.theme.muted}`}>Clear</Text>
@@ -118,20 +114,15 @@ export default function ListView({ controller }) {
                             {filtersOpen ? (
                                 <>
                                     <View style={tw`gap-3 mt-4`}>
-                                        <Field label="Date" labelClass={controller.theme.muted}>
-                                            <DatePickerField
-                                                value={controller.filter.date}
-                                                onChange={(date) => controller.setFilter({ ...controller.filter, date })}
-                                                variant={controller.themeMode}
-                                            />
-                                        </Field>
                                         <Field label="Medicine" labelClass={controller.theme.muted}>
                                             <DropdownField
                                                 placeholder="All medicines"
-                                                value={controller.filter.customer}
-                                                options={controller.customers.map((customer) => customer.name)}
-                                                onChange={(customer) =>
-                                                    controller.setFilter({ ...controller.filter, customer })
+                                                value={controller.filter.medicine}
+                                                options={Array.from(
+                                                    new Set(controller.entries.map((entry) => entry.name).filter(Boolean)),
+                                                )}
+                                                onChange={(medicine) =>
+                                                    controller.setFilter({ ...controller.filter, medicine })
                                                 }
                                                 allowEmpty
                                                 variant={controller.themeMode}
@@ -147,26 +138,14 @@ export default function ListView({ controller }) {
                                                 variant={controller.themeMode}
                                             />
                                         </Field>
-                                        <Field label="Availability" labelClass={controller.theme.muted}>
-                                            <DropdownField
-                                                placeholder="All availability statuses"
-                                                value={controller.filter.status}
-                                                options={controller.statusOptions}
-                                                onChange={(status) =>
-                                                    controller.setFilter({ ...controller.filter, status })
-                                                }
-                                                allowEmpty
-                                                variant={controller.themeMode}
-                                            />
-                                        </Field>
                                     </View>
 
                                     <View style={tw`flex-row gap-2 mt-4`}>
-                                        {["date", "slno", "type"].map((item) => (
+                                        {["slno", "type"].map((item) => (
                                             <Pressable
                                                 key={item}
                                                 onPress={() => controller.setSortBy(item)}
-                                                style={tw`flex-1 py-3 rounded-full ${
+                                                style={tw`flex-1 items-center justify-center py-3 rounded-full ${
                                                     controller.sortBy === item
                                                         ? controller.theme.primary
                                                         : controller.theme.cardAlt
@@ -187,7 +166,7 @@ export default function ListView({ controller }) {
                                             onPress={() =>
                                                 controller.setSortDir(controller.sortDir === "asc" ? "desc" : "asc")
                                             }
-                                            style={tw`px-4 py-3 rounded-full ${controller.theme.accentBg}`}
+                                            style={tw`flex-1 items-center justify-center py-3 rounded-full ${controller.theme.accentBg}`}
                                         >
                                             <Text style={tw`text-xs font-black ${controller.theme.accentText}`}>
                                                 {controller.sortDir === "asc" ? "ASC" : "DESC"}
@@ -232,37 +211,21 @@ export default function ListView({ controller }) {
 }
 
 function SimpleList({ controller }) {
-    const [customerFiltersOpen, setCustomerFiltersOpen] = useState(false);
-    const [customerFilter, setCustomerFilter] = useState({ name: "", location: "" });
-    const [customerSortBy, setCustomerSortBy] = useState("name");
-    const [customerSortDir, setCustomerSortDir] = useState("asc");
-    const isCustomers = controller.listMode === "customers";
     const isStatuses = controller.listMode === "statuses";
-    const customerNames = Array.from(new Set(controller.customers.map((customer) => customer.name).filter(Boolean)));
-    const customerLocations = Array.from(new Set(controller.customers.map((customer) => customer.location).filter(Boolean)));
-    const visibleCustomers = controller.customers
-        .filter((customer) => {
-            const matchesName = customerFilter.name ? customer.name === customerFilter.name : true;
-            const matchesLocation = customerFilter.location ? customer.location === customerFilter.location : true;
-            return matchesName && matchesLocation;
-        })
-        .sort((left, right) => {
-            const leftValue = `${left[customerSortBy] || ""}`.toLowerCase();
-            const rightValue = `${right[customerSortBy] || ""}`.toLowerCase();
-            if (leftValue < rightValue) return customerSortDir === "asc" ? -1 : 1;
-            if (leftValue > rightValue) return customerSortDir === "asc" ? 1 : -1;
-            return 0;
-        });
-    const items = isCustomers ? visibleCustomers : isStatuses ? controller.customStatuses : controller.types;
-    const emptyText = isCustomers ? "No medicine names saved." : isStatuses ? "No availability statuses saved." : "No types saved.";
-    const title = isCustomers ? "Medicine Name List" : isStatuses ? "Availability List" : "Type List";
-    const Icon = isCustomers ? UserRound : isStatuses ? ClipboardList : Layers3;
-    const addAction = isCustomers
-        ? controller.openCustomerCreate
-        : isStatuses
-            ? controller.openStatusCreate
-            : controller.openTypeCreate;
-    const activeCustomerFilters = [customerFilter.name, customerFilter.location].filter(Boolean).length;
+    const isCategories = controller.listMode === "categories";
+    const items = isStatuses ? controller.customStatuses : isCategories ? controller.categories : controller.types;
+    const emptyText = isStatuses
+        ? "No availability statuses saved."
+        : isCategories
+          ? "No categories saved."
+          : "No types saved.";
+    const title = isStatuses ? "Availability List" : isCategories ? "Category List" : "Type List";
+    const Icon = isStatuses ? ClipboardList : isCategories ? Tag : Layers3;
+    const addAction = isStatuses
+        ? controller.openStatusCreate
+        : isCategories
+          ? controller.openCategoryCreate
+          : controller.openTypeCreate;
 
     return (
         <>
@@ -279,95 +242,6 @@ function SimpleList({ controller }) {
                 </View>
             </View>
 
-            {isCustomers ? (
-                <View style={tw`p-4 mb-4 ${controller.theme.card} rounded-3xl shadow-sm border ${controller.theme.border}`}>
-                    <Pressable onPress={() => setCustomerFiltersOpen((open) => !open)} style={tw`flex-row items-center`}>
-                        <SlidersHorizontal
-                            size={18}
-                            color={controller.themeMode === "dark" ? "#f4f1ea" : "#20252d"}
-                        />
-                        <Text style={tw`ml-2 flex-1 font-black ${controller.theme.text}`}>Filter and sort</Text>
-                        {activeCustomerFilters ? (
-                            <>
-                                <View style={tw`mr-2 px-3 py-1 rounded-full ${controller.theme.accentBg}`}>
-                                    <Text style={tw`text-xs font-black ${controller.theme.accentText}`}>
-                                        {activeCustomerFilters}
-                                    </Text>
-                                </View>
-                                <Pressable
-                                    onPress={() => setCustomerFilter({ name: "", location: "" })}
-                                    style={tw`mr-3 px-3 py-1.5 rounded-full ${controller.theme.cardAlt}`}
-                                >
-                                    <Text style={tw`text-[10px] font-black ${controller.theme.muted}`}>Clear</Text>
-                                </Pressable>
-                            </>
-                        ) : null}
-                        {customerFiltersOpen ? (
-                            <ChevronUp size={20} color={controller.themeMode === "dark" ? "#f4f1ea" : "#20252d"} />
-                        ) : (
-                            <ChevronDown size={20} color={controller.themeMode === "dark" ? "#f4f1ea" : "#20252d"} />
-                        )}
-                    </Pressable>
-
-                    {customerFiltersOpen ? (
-                        <>
-                            <View style={tw`gap-3 mt-4`}>
-                                <Field label="Medicine Name" labelClass={controller.theme.muted}>
-                                    <DropdownField
-                                        placeholder="All medicines"
-                                        value={customerFilter.name}
-                                        options={customerNames}
-                                        onChange={(name) => setCustomerFilter((current) => ({ ...current, name }))}
-                                        allowEmpty
-                                        variant={controller.themeMode}
-                                    />
-                                </Field>
-                                <Field label="Manufacturer / Brand" labelClass={controller.theme.muted}>
-                                    <DropdownField
-                                        placeholder="All manufacturers"
-                                        value={customerFilter.location}
-                                        options={customerLocations}
-                                        onChange={(location) => setCustomerFilter((current) => ({ ...current, location }))}
-                                        allowEmpty
-                                        variant={controller.themeMode}
-                                    />
-                                </Field>
-                            </View>
-
-                            <View style={tw`flex-row gap-2 mt-4`}>
-                                {["name", "location"].map((item) => (
-                                    <Pressable
-                                        key={item}
-                                        onPress={() => setCustomerSortBy(item)}
-                                        style={tw`flex-1 py-3 rounded-full ${
-                                            customerSortBy === item ? controller.theme.primary : controller.theme.cardAlt
-                                        }`}
-                                    >
-                                        <Text
-                                            style={tw`text-center text-xs font-black ${
-                                                customerSortBy === item
-                                                    ? controller.theme.primaryText
-                                                    : controller.theme.muted
-                                            }`}
-                                        >
-                                            {item.toUpperCase()}
-                                        </Text>
-                                    </Pressable>
-                                ))}
-                                <Pressable
-                                    onPress={() => setCustomerSortDir(customerSortDir === "asc" ? "desc" : "asc")}
-                                    style={tw`px-4 py-3 rounded-full ${controller.theme.accentBg}`}
-                                >
-                                    <Text style={tw`text-xs font-black ${controller.theme.accentText}`}>
-                                        {customerSortDir === "asc" ? "ASC" : "DESC"}
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        </>
-                    ) : null}
-                </View>
-            ) : null}
-
             {items.length === 0 ? (
                 <View
                     style={tw`items-center p-8 ${controller.theme.card} rounded-3xl border border-dashed ${controller.theme.border}`}
@@ -376,10 +250,10 @@ function SimpleList({ controller }) {
                 </View>
             ) : (
                 items.map((item, index) =>
-                    isCustomers ? (
-                        <CustomerCard controller={controller} customer={item} key={item.id} />
-                    ) : isStatuses ? (
+                    isStatuses ? (
                         <StatusCard controller={controller} status={item} key={item.id} />
+                    ) : isCategories ? (
+                        <CategoryCard controller={controller} key={`${item}-${index}`} categoryName={item} />
                     ) : (
                         <TypeCard controller={controller} key={`${item}-${index}`} typeName={item} />
                     ),
@@ -397,33 +271,6 @@ function AddListButton({ controller, onPress }) {
         >
             <Plus size={21} color={controller.themeMode === "dark" ? "#171717" : "#ffffff"} />
         </Pressable>
-    );
-}
-
-function CustomerCard({ controller, customer }) {
-    return (
-        <View style={tw`mb-3 p-4 ${controller.theme.card} border ${controller.theme.border} rounded-[28px] shadow-sm`}>
-            <View style={tw`flex-row items-start`}>
-                <View style={tw`w-12 h-12 items-center justify-center rounded-2xl ${controller.theme.cardAlt}`}>
-                    <UserRound size={22} color={controller.theme.accentColor} />
-                </View>
-                <View style={tw`ml-3 flex-1`}>
-                    <Text style={tw`text-lg font-black ${controller.theme.text}`}>{customer.name}</Text>
-                    <Text numberOfLines={2} style={tw`mt-1 text-sm ${controller.theme.muted}`}>
-                        {customer.details || "No details"}
-                    </Text>
-                    <View style={tw`mt-3 gap-1`}>
-                        <Meta controller={controller} icon={Phone} value={customer.phone || "-"} />
-                        <Meta controller={controller} icon={MapPin} value={customer.location || "-"} />
-                    </View>
-                </View>
-            </View>
-            <RowActions
-                controller={controller}
-                onDelete={() => controller.deleteCustomer(customer.id)}
-                onEdit={() => controller.openCustomerEdit(customer)}
-            />
-        </View>
     );
 }
 
@@ -464,6 +311,27 @@ function TypeCard({ controller, typeName }) {
                 controller={controller}
                 onDelete={() => controller.deleteType(typeName)}
                 onEdit={() => controller.openTypeEdit(typeName)}
+            />
+        </View>
+    );
+}
+
+function CategoryCard({ controller, categoryName }) {
+    return (
+        <View style={tw`mb-3 p-4 ${controller.theme.card} border ${controller.theme.border} rounded-[28px] shadow-sm`}>
+            <View style={tw`flex-row items-center`}>
+                <View style={tw`w-12 h-12 items-center justify-center rounded-2xl ${controller.theme.cardAlt}`}>
+                    <Tag size={22} color={controller.theme.accentColor} />
+                </View>
+                <View style={tw`ml-3 flex-1`}>
+                    <Text style={tw`text-lg font-black ${controller.theme.text}`}>{categoryName}</Text>
+                    <Text style={tw`mt-1 text-sm ${controller.theme.muted}`}>Medicine category option</Text>
+                </View>
+            </View>
+            <RowActions
+                controller={controller}
+                onDelete={() => controller.deleteCategory(categoryName)}
+                onEdit={() => controller.openCategoryEdit(categoryName)}
             />
         </View>
     );
@@ -516,8 +384,15 @@ function EntryCard({ controller, entry, onPress }) {
                         </View>
 
                         <Text style={tw`mt-2 text-lg font-black ${controller.theme.text}`}>{entry.name}</Text>
+                        
                         <Text numberOfLines={1} style={tw`mt-1 text-sm font-bold ${controller.theme.muted}`}>
-                            {entry.alternates || entry.detail1 ? `Alternates: ${entry.alternates || entry.detail1}` : "No alternates saved"}
+                            {entry.location ? `Category: ${entry.location}` : "No category"}
+                        </Text>
+                        <Text numberOfLines={1} style={tw`mt-1 text-sm font-bold ${controller.theme.muted}`}>
+                            {entry.type || "No type"}
+                        </Text>
+                        <Text numberOfLines={1} style={tw`mt-1 text-sm font-bold ${controller.theme.muted}`}>
+                            {entry.details ? `Details: ${entry.details}` : "No details saved"}
                         </Text>
                         <Text numberOfLines={1} style={tw`mt-1 text-sm font-bold ${controller.theme.muted}`}>
                             {entry.usedFor || entry.detail2 ? `Used for: ${entry.usedFor || entry.detail2}` : ""}
@@ -526,11 +401,13 @@ function EntryCard({ controller, entry, onPress }) {
                             {entry.dosage || entry.detail3 ? `Dosage: ${entry.dosage || entry.detail3}` : ""}
                         </Text>
                         <Text numberOfLines={1} style={tw`mt-1 text-sm font-bold ${controller.theme.muted}`}>
-                            {entry.type || "No type"}
+                            {entry.alternates || entry.detail1
+                                ? `Alternates: ${entry.alternates || entry.detail1}`
+                                : "No alternates saved"}
                         </Text>
-                        <Text numberOfLines={1} style={tw`mt-1 text-sm font-bold ${controller.theme.muted}`}>
+                        {/* <Text numberOfLines={1} style={tw`mt-1 text-sm font-bold ${controller.theme.muted}`}>
                             {entry.status || "No availability"}
-                        </Text>
+                        </Text> */}
                     </View>
 
                     <View style={tw`items-center`}>
