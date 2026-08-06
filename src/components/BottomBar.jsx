@@ -8,7 +8,7 @@ export default function BottomBar({ bottomInset = 0, controller }) {
 
   return (
     <View style={[tw`absolute left-5 right-5`, { bottom: Math.max(bottomInset, 12) }]}>
-      <View style={tw`h-18 px-3 flex-row items-center justify-between ${controller.theme.bottom} rounded-full opacity-90 shadow-lg`}>
+      <View style={tw`h-14 px-5 flex-row items-center justify-between ${controller.theme.bottom} rounded-full opacity-90 shadow-lg`}>
         <TabButton
           active={controller.screen === "dashboard"}
           controller={controller}
@@ -25,9 +25,9 @@ export default function BottomBar({ bottomInset = 0, controller }) {
         />
         <Pressable
           onPress={controller.openCreate}
-          style={tw`w-14 h-14 items-center justify-center rounded-full ${plusButtonClass} shadow-lg`}
+          style={tw`w-16 h-16 items-center justify-center rounded-full ${plusButtonClass} shadow-lg`}
         >
-          <Plus size={26} color={plusIconColor} />
+          <Plus size={30} color={plusIconColor} />
         </Pressable>
         <TabButton
           active={controller.screen === "export"}
