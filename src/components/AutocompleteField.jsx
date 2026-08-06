@@ -1,5 +1,5 @@
 import { Check, ChevronDown } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import tw from "twrnc";
 
@@ -12,6 +12,8 @@ export default function AutocompleteField({
   variant = "light"
 }) {
   const [focused, setFocused] = useState(false);
+  const inputRef = useRef(null);
+  const blurTimerRef = useRef(null);
   const dark = variant === "dark";
   const normalizedValue = `${value || ""}`.trim().toLowerCase();
   const uniqueOptions = useMemo(
@@ -38,19 +40,44 @@ export default function AutocompleteField({
   const placeholderColor = dark ? "#777d90" : "#8d96a3";
 
   function selectOption(option) {
+    if (blurTimerRef.current) {
+      clearTimeout(blurTimerRef.current);
+      blurTimerRef.current = null;
+    }
     onSelect?.(option);
     onChange?.(option);
     setFocused(false);
+    inputRef.current?.blur();
+  }
+
+  function openOptions() {
+    if (blurTimerRef.current) {
+      clearTimeout(blurTimerRef.current);
+      blurTimerRef.current = null;
+    }
+    setFocused(true);
+    inputRef.current?.focus();
+  }
+
+  function closeOptionsSoon() {
+    blurTimerRef.current = setTimeout(() => {
+      setFocused(false);
+      blurTimerRef.current = null;
+    }, 300);
   }
 
   return (
     <View>
-      <View style={tw`min-h-13 px-4 flex-row items-center border ${showOptions || showNotFound ? "rounded-t-2xl rounded-b-none" : "rounded-2xl"} ${inputTheme}`}>
+      <Pressable
+        onPress={openOptions}
+        style={tw`min-h-13 px-4 flex-row items-center border ${showOptions || showNotFound ? "rounded-t-2xl rounded-b-none" : "rounded-2xl"} ${inputTheme}`}
+      >
         <TextInput
+          ref={inputRef}
           value={value}
           onChangeText={onChange}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onFocus={openOptions}
+          onBlur={closeOptionsSoon}
           placeholder={placeholder}
           placeholderTextColor={placeholderColor}
           style={tw`flex-1 min-h-13 text-base ${dark ? "text-[#f4f1ea]" : "text-[#20252d]"}`}
@@ -60,7 +87,7 @@ export default function AutocompleteField({
         ) : (
           <ChevronDown size={18} color={dark ? "#f4f1ea" : "#20252d"} />
         )}
-      </View>
+      </Pressable>
 
       {showOptions || showNotFound ? (
         <View style={tw`mt-1 max-h-48 overflow-hidden rounded-b-2xl border border-t-0 ${dark ? "bg-[#232323] border-[#3a3a3a]" : "bg-white border-[#dde2ea]"}`}>

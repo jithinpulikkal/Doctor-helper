@@ -15,7 +15,7 @@ export default function ExportView({ controller }) {
   return (
     <View style={tw`flex-1 ${controller.theme.page}`}>
       <Header controller={controller} title="Export" />
-      <ScrollView contentContainerStyle={tw`px-5 pb-24`}>
+      <ScrollView keyboardShouldPersistTaps="always" contentContainerStyle={tw`px-5 pb-24`}>
         <View style={tw`p-5 ${controller.theme.card} rounded-[32px] border ${controller.theme.border} shadow-sm`}>
           <View style={tw`w-16 h-16 items-center justify-center rounded-3xl ${controller.theme.cardAlt}`}>
             <Share size={28} color={controller.theme.accentColor} />

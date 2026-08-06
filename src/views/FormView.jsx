@@ -18,7 +18,7 @@ export default function FormView({ controller }) {
                 showBack
             />
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={tw`flex-1`}>
-                <ScrollView contentContainerStyle={tw`px-5 pb-24`}>
+                <ScrollView keyboardShouldPersistTaps="always" contentContainerStyle={tw`px-5 pb-24`}>
                     <View style={tw`items-center pt-3 pb-5`}>
                         <View style={tw`w-18 h-18 items-center justify-center rounded-3xl ${iconBg}`}>
                             <Pill size={34} color={controller.theme.accentColor} />

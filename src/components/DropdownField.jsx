@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import tw from "twrnc";
 
 export default function DropdownField({ allowEmpty = false, onChange, options, placeholder = "Select", value, variant = "light" }) {
@@ -42,34 +42,36 @@ export default function DropdownField({ allowEmpty = false, onChange, options, p
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={tw`flex-1 justify-end bg-black/35`} onPress={() => setOpen(false)}>
-          <Pressable style={tw`mx-4 mb-8 max-h-96 overflow-hidden rounded-2xl border shadow-lg ${palette.menu}`}>
-            <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always">
-              {dropdownOptions.length === 0 ? (
-                <View style={tw`px-4 py-4`}>
-                  <Text style={tw`text-base font-bold ${palette.muted}`}>Not found</Text>
-                </View>
-              ) : dropdownOptions.map((option, index) => {
-                const label = option || placeholder;
-                const selected = option === value;
-                return (
-                  <Pressable
-                    key={`${label}-${index}`}
-                    onPress={() => {
-                      onChange(option);
-                      setOpen(false);
-                    }}
-                    style={tw`px-4 py-4 border-b ${palette.row} ${selected ? palette.selectedRow : ""}`}
-                  >
-                    <Text style={tw`text-base ${selected ? `font-bold ${palette.selectedText}` : palette.text}`}>
-                      {label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </Pressable>
-        </Pressable>
+        <View style={tw`flex-1 justify-end`}>
+          <Pressable style={tw`absolute inset-0 bg-black/35`} onPress={() => setOpen(false)} />
+          <View style={tw`mx-4 mb-8 max-h-96 overflow-hidden rounded-2xl border shadow-lg ${palette.menu}`}>
+          <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled">
+            {dropdownOptions.length === 0 ? (
+              <View style={tw`px-4 py-4`}>
+                <Text style={tw`text-base font-bold ${palette.muted}`}>Not found</Text>
+              </View>
+            ) : dropdownOptions.map((option, index) => {
+              const label = option || placeholder;
+              const selected = option === value;
+              return (
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  key={`${label}-${index}`}
+                  onPress={() => {
+                    onChange(option);
+                    setOpen(false);
+                  }}
+                  style={tw`px-4 py-4 border-b ${palette.row} ${selected ? palette.selectedRow : ""}`}
+                >
+                  <Text style={tw`text-base ${selected ? `font-bold ${palette.selectedText}` : palette.text}`}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+          </View>
+        </View>
       </Modal>
     </>
   );
