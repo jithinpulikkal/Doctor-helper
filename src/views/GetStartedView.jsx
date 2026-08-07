@@ -12,7 +12,7 @@ const slides = [
   {
     icon: BarChart3,
     title: "Doctor Dashboard",
-    text: "Review medicines, availability, saved names, and medicine types visually."
+    text: "Review medicines, saved names, categories, and medicine types visually."
   },
   {
     icon: FileSpreadsheet,

@@ -41,7 +41,7 @@ export default function LoginView({ controller }) {
           <View style={tw`w-16 h-16 items-center justify-center rounded-3xl ${controller.theme.accentBg}`}>
             <ShieldCheck size={30} color={controller.theme.accentColor} />
           </View>
-          <Text style={tw`mt-5 text-3xl font-black ${controller.theme.text}`}>Login</Text>
+          <Text style={tw`mt-4.5 text-3xl font-black ${controller.theme.text}`}>Login</Text>
           <Text style={tw`mt-2 leading-6 ${controller.theme.muted}`}>
             Data is saved separately for each username.
           </Text>

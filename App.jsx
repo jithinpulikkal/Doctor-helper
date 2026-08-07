@@ -16,7 +16,6 @@ import LoginView from "./src/views/LoginView";
 import NewEntryView from "./src/views/NewEntryView";
 import ProfileView from "./src/views/ProfileView";
 import SettingsView from "./src/views/SettingsView";
-import StatusFormView from "./src/views/StatusFormView";
 import DashboardView from "./src/views/DashboardView";
 import TypeFormView from "./src/views/TypeFormView";
 
@@ -48,7 +47,7 @@ function AppShell() {
         return true;
       }
 
-      if (["detail", "form", "login", "newEntry", "categoryForm", "statusForm", "typeForm", "research"].includes(controller.screen)) {
+      if (["detail", "form", "login", "newEntry", "categoryForm", "typeForm", "research"].includes(controller.screen)) {
         controller.goBack(controller.loggedIn ? "dashboard" : "start");
         return true;
       }
@@ -81,7 +80,6 @@ function AppShell() {
         {controller.screen === "newEntry" && <NewEntryView controller={controller} />}
         {controller.screen === "form" && <FormView controller={controller} />}
         {controller.screen === "categoryForm" && <CategoryFormView controller={controller} />}
-        {controller.screen === "statusForm" && <StatusFormView controller={controller} />}
         {controller.screen === "typeForm" && <TypeFormView controller={controller} />}
         {controller.screen === "detail" && controller.selectedEntry && (
           <DetailView controller={controller} entry={controller.selectedEntry} />

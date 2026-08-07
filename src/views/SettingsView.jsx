@@ -51,7 +51,7 @@ export default function SettingsView({ controller }) {
             <Text style={tw`ml-2 text-lg font-black ${controller.theme.text}`}>Local data</Text>
           </View>
           <Text style={tw`mt-2 leading-5 ${controller.theme.muted}`}>
-            Medicine records, profile, types, availability options, and theme preference are saved on this phone.
+            Medicine records, profile, categories, types, and theme preference are saved on this phone.
           </Text>
           <Text style={tw`mt-4 text-3xl font-black ${controller.theme.text}`}>
             {controller.stats.total}

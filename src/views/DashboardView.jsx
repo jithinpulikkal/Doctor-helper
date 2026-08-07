@@ -1,4 +1,4 @@
-import { Layers3, ListPlus, Pill, Tag } from "lucide-react-native";
+import { Layers3, Pill, Tag } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import tw from "twrnc";
@@ -8,7 +8,6 @@ export default function DashboardView({ controller }) {
     const totalRecords = controller.entries.length;
     const savedDataTotal =
         controller.entries.length +
-        controller.customStatuses.length +
         controller.types.length +
         controller.categories.length;
     const openList = (mode) => {
@@ -31,14 +30,6 @@ export default function DashboardView({ controller }) {
             color: "#16a34a",
             icon: Tag,
             onPress: () => openList("categories"),
-        },
-        {
-            key: "statuses",
-            label: "Availability",
-            value: controller.customStatuses.length,
-            color: "#dc2626",
-            icon: ListPlus,
-            onPress: () => openList("statuses"),
         },
         {
             key: "types",

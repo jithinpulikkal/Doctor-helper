@@ -192,8 +192,6 @@ export function useCustomerController() {
       "current entries": "entries",
       entry: "entries",
       entries: "entries",
-      status: "statuses",
-      statuses: "statuses",
       type: "types",
       types: "types",
       category: "categories",

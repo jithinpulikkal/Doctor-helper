@@ -21,14 +21,6 @@ export default function DetailView({ controller, entry }) {
                             >
                                 SL {entry.slno} - {entry.date}
                             </Text>
-                            <View
-                                style={tw`flex-row items-center px-3 py-2 rounded-full ${dark ? "bg-[#232323]" : "bg-white/20"}`}
-                            >
-                                <View style={tw`w-2.5 h-2.5 mr-2 rounded-full ${dark ? "bg-[#f4f1ea]" : "bg-white"}`} />
-                                <Text style={tw`text-xs font-black ${dark ? "text-[#f4f1ea]" : "text-white"}`}>
-                                    {entry.status || "No availability"}
-                                </Text>
-                            </View>
                         </View>
                     </View>
 
